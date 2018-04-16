@@ -1,10 +1,11 @@
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import LastUpdates from './LastUpdates';
-import { articlesSortedByCreationDate } from '../store/articles';
+import { getArticlesSortedByCreationDate, getLastModification } from '../store/articles';
 
 const mapStateToProps = createStructuredSelector({
-  articles: articlesSortedByCreationDate
+  articles: getArticlesSortedByCreationDate,
+  lastModification: getLastModification,
 });
 
 const mapDispatchToProps = {};

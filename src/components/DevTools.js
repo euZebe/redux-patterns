@@ -6,7 +6,7 @@ export default createDevTools(
   <ChartMonitor
     widthBetweenNodesCoeff={2}
     style={{
-      height: '400px',
+      height: '100vh',
     }}
   />
 );

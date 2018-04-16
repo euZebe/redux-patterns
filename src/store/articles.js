@@ -22,10 +22,15 @@ export default function articlesReducer(state = {}, action) {
   }
 }
 
-export const articlesSortedByCreationDate = createSelector(
+export const getArticlesSortedByCreationDate = createSelector(
   getArticlesById,
   articles => _sortBy(Object.values(articles), a => a.creationDate)
 );
+
+export const getLastModification = createSelector(
+  getArticlesSortedByCreationDate,
+  articles => articles.length ? articles[articles.length - 1].creationDate : ''
+)
 
 const FORM_CREATE = 'FORM_CREATE';
 export const createForm = (title, body) => ({
@@ -33,6 +38,6 @@ export const createForm = (title, body) => ({
   payload: {
     title,
     body,
-    creationDate: new Date(),
+    creationDate: new Date().getTime(),
   }
 });
