@@ -5,7 +5,7 @@ import { getArticlesById } from './reducers';
 
 export default function articlesReducer(state = {}, action) {
   switch (action.type) {
-    case FORM_CREATE:
+    case 'FORM_CREATE':
       const id = generate();
       const { title, body, creationDate } = action.payload;
       return {
@@ -24,12 +24,12 @@ export default function articlesReducer(state = {}, action) {
 
 export const getArticlesSortedByCreationDate = createSelector(
   getArticlesById,
-  articles => _sortBy(Object.values(articles), a => a.creationDate)
+  articles => articles ? _sortBy(Object.values(articles), a => a.creationDate) : []
 );
 
 export const getLastModification = createSelector(
   getArticlesSortedByCreationDate,
-  articles => articles.length ? articles[articles.length - 1].creationDate : ''
+  articles => articles.length ? articles[articles.length - 1].creationDate : null
 )
 
 const FORM_CREATE = 'FORM_CREATE';
