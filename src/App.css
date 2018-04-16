@@ -1,0 +1,7 @@
+.App {
+  text-align: center;
+  display: flex;
+}
+.App> :first-child {
+  min-width: 40vw;
+}
