@@ -18,8 +18,9 @@ export default class ArticleForm extends React.Component {
   render() {
     return (
       <div>
+        <h2>new article</h2>
         <input ref={title => this.title = title} placeholder='title' />
-        <input ref={content => this.content = content} placeholder='content' />
+        <textarea ref={content => this.content = content} placeholder='content' />
         <button onClick={this.createForm}>add</button>
       </div>
     );

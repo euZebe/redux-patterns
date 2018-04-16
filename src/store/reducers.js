@@ -8,5 +8,7 @@ const reducers = combineReducers({
 export default reducers;
 
 // selectors
-export const getArticles = state => state.articlesById;
+export function getArticlesById(state) {
+  return state.articles
+};
 
