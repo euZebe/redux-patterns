@@ -5,7 +5,7 @@ import { getArticlesById } from './reducers';
 
 export default function articlesReducer(state = {}, action) {
   switch (action.type) {
-    case 'FORM_CREATE':
+    case FORM_CREATE:
       const id = generate();
       const { title, body, creationDate } = action.payload;
       return {

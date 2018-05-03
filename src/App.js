@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import DevTools from './components/DevTools';
 import ArticleForm from './components/ArticleFormContainer';
 import LastUpdates from './components/LastUpdatesContainer';
+import ActionDispatchingSeveralTimes from './components/ActionDispatchinSeveralTimes';
 import './App.css';
 
 class App extends Component {
@@ -11,6 +12,7 @@ class App extends Component {
         <div>
           <ArticleForm />
           <LastUpdates />
+          <ActionDispatchingSeveralTimes />
         </div>
         <DevTools />
       </div>
