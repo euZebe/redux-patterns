@@ -1,5 +1,9 @@
 const INCREMENT_COUNTER = 'INCREMENT_COUNTER';
 
+/**
+ * a basic thunk which dispatches several actions (well, several times the same action) and displays the intermediate values for the store
+ * @returns {function(*, *)} a thunk
+ */
 export function dispatchSeveralTimes() {
   return (dispatch, getState) => {
     const previousState = getState().counter;
