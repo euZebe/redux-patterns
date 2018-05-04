@@ -120,6 +120,7 @@ montrer quelques bonnes et mauvaises pratiques (mettre en lumière certaines pra
 ## bonnes pratiques
 
 
+
 ### structuration du store
 - définir "normalisation" des données (Think of the app’s state as a database.) => séparer les articles de blogs, les auteurs et les commentaires dans des morceaux différents du store.
 - dictionnaire (hashmap de things dans thingById) plutôt que tableaux (pour accéder à l'élément avec l'ID X, il faut alors faire un array.find() plutôt qu'un dictionnaire[x])
@@ -148,6 +149,7 @@ TODO: faire un exemple (en pur JS + redux) avec des console.log dans les subscri
 - gérer les listes par un index: des attributs d'un objet dont les clés sont les identifiants des objets listés (hashmap) => exemple usersById (object) et usersByCountry  (tableau de UserID)... (ou mieux, utilisez des selectors)
 
 
+
 ### Selector (picto)
 un sélecteur, comme son nom l'indique, permet de sélectionner des données d'un state. Il s'agit d'une fonction (pure) qui prend la forme suivante:
 ```
@@ -172,6 +174,7 @@ Dans la doc Redux, il est proposé une organisation par catalogue + indexes. Res
 - => reselect et la mémorisation
 
 - Pour un composant React par exemple, éviter de calculer des données (sort, filter, map, reduce...) dans le render d'un composant ou dans le mapStateToProps du Container ; préférez faire la préparation des données dans un selector, appelé dans le Container (rappeler qu'un Container souscrit aux modifications du store, et est donc réexécuté à chaque modification de celui-ci... impact sur les perfs)
+
 
 
 ### nommage
@@ -200,9 +203,12 @@ TODO: take examples from https://redux.js.org/recipes/structuring-reducers/immut
 - rigueur, ou
 - librairie garantissant l'absence de mutation du state, Immutable-js par exemple
 
+
+
 ### Tests
 - tester les reducers est simple (fonction pure).
 - possibilité de tester par duck: (TODO exemple)
+
 
 ```javascript
 const state = {
@@ -256,6 +262,7 @@ d'autres considèrent qu'on ne met dans le store que ce qui va être partagé pa
 
 - With great power comes great responsibility
 - faire preuve de pragmatisme ; comme en tout, ne pas appliquer de règles sans discernement ni sans les comprendre
+
 
 ### ressources
 * [Site officiel](http://redux.js.org)
