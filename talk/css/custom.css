@@ -1,0 +1,7 @@
+section.only-image.present {
+    height: 100%;
+}
+section.only-image p {
+    display: block;
+    height: 50vh;
+}
