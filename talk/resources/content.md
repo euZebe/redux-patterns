@@ -1,9 +1,11 @@
 ﻿# Redux
 ## bonnes et moins bonnes pratiques
 
-~~~
+///
 ## les bases
 ![](resources/transistor-transparent.png) <!-- .element: class="slide-icon" -->
+~~~
+## Qu'est-ce ?
 - librairie JS 
 - indépendante
 - gérant l'état de l'application
@@ -38,8 +40,8 @@ function withVAT(value) {
 
 
 ///
-### illustration du principe :
-### le Mölkky
+## illustration du principe :
+## le Mölkky
 <!-- .slide: class="only-image" -->
 ![initial state](resources/initialState.jpg)
 ![new state](resources/newState.jpg)
@@ -47,7 +49,7 @@ function withVAT(value) {
 Note: rappeler les règles brièvement
 
 ~~~
-#### state
+### state
 📄 <!-- .element: class="slide-icon" -->
 ```
     (_7)(_8)(_9)            Alice:  { score: 0, ratés: 0 }
@@ -62,34 +64,38 @@ Note: rappeler les règles brièvement
                  (_4) 
                  (_5)
 			   
-    (_7) 
- (_3)	(11)    (_6)
+     (_7) 
+ (_3)	(11)   (_6)
           (10)   (_4)
 ```
 ~~~
-#### action
+### action
 ![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
 ![action](resources/action.jpg)
 
 ~~~
-#### reducer
+### reducer
 ![throw](resources/gears.png)<!-- .element: class="slide-icon" -->
-![reducer](resources/gears.jpg)
+fonction pure
+```
+reducer: (previousScore, action) => nextScore
+```
 
 ~~~
-#### listeners
-![listeners](resources/listeners.jpg) // TODO: joueurs + supporters
+### listeners
+Alice + Bob + supporters
+
+![listeners](resources/supporters.png)
 
 ~~~
-#### store
+### store
+![listeners](resources/Redux-with-pictos.png)
+
+Note:
 - 2 connecteurs (fonctions _subscribe_ et _dispatch_)
 - le.s reducer.s
 - le state courant
-=> notifie le.s _subscriber.s_ à chaque nouveau state
 
-// TODO schéma global du store + action + reducer.s + state
-
-Note:
 le _Store_ met à disposition un
 ---( _State_ : l'état actuel de l'application)--->
 Des _Listeners_ souscrivent au modification de ce store (store.subscribe()).
@@ -98,8 +104,6 @@ Une action est
 les _Reducers_ traitent cette action pour générer un nouveau
 ---( _State_ )--->
 les Listeners sont notifiées d'une modification du store (et se rafraichissent par exemple, s'il s'agit de vues).
-
-TODO: mettre des pictos pour chaque terme (loupe pour selector, ->[]-> pour reducer, document pour state, personne pour listener, flèche avec un message pour action, arc pour dispatch), et rappeler le picto pour chaque slide
 
 TODO: montrer un exemple de code (sans React dedans)
 
@@ -114,22 +118,19 @@ Une action est rarement créée à la main, mais souvent instanciée à partir d
 
 
 ///
-### est-ce le meilleur gestionnaire d'état ?
-"je ne crois pas qu'il y ait de bonne ou de mauvaise situation"
-le but n'est pas de dire que que redux est mieux ou moins bien que telle ou telle solution de gestion d'état,
-elle a ses inconvénients et ses avantages ; elle reste néanmoins une librairie très utilisée et qu'il est bon de maîtriser pour l'exploiter au mieux
+## la meilleure solution de gestion d'état ?
+![otis](resources/bonne-ou-mauvaise-solution.jpg)<!-- .element: class="fragment" data-fragment-index="1" -->
 
+Note: le but n'est pas de dire que que redux est mieux ou moins bien que telle ou telle solution de gestion d'état, elle a ses inconvénients et ses avantages ; elle reste néanmoins une librairie très utilisée et qu'il est bon de maîtriser pour l'exploiter au mieux
 
-///
-### objectif de la présentation:
-montrer quelques bonnes et mauvaises pratiques (mettre en lumière certaines pratiques ?)
 
 
 ///
-## bonnes pratiques
+## objectif de la présentation
+=> mettre en lumière certaines pratiques
 
 
-///
+~~~
 ### structuration du store
 - définir "normalisation" des données (Think of the app’s state as a database.) => séparer les articles de blogs, les auteurs et les commentaires dans des morceaux différents du store.
 - dictionnaire (hashmap de things dans thingById) plutôt que tableaux (pour accéder à l'élément avec l'ID X, il faut alors faire un array.find() plutôt qu'un dictionnaire[x])
@@ -158,7 +159,7 @@ TODO: faire un exemple (en pur JS + redux) avec des console.log dans les subscri
 - gérer les listes par un index: des attributs d'un objet dont les clés sont les identifiants des objets listés (hashmap) => exemple usersById (object) et usersByCountry  (tableau de UserID)... (ou mieux, utilisez des selectors)
 
 
-
+~~~
 ### Selector (picto)
 un sélecteur, comme son nom l'indique, permet de sélectionner des données d'un state. Il s'agit d'une fonction (pure) qui prend la forme suivante:
 ```
@@ -185,14 +186,14 @@ Dans la doc Redux, il est proposé une organisation par catalogue + indexes. Res
 - Pour un composant React par exemple, éviter de calculer des données (sort, filter, map, reduce...) dans le render d'un composant ou dans le mapStateToProps du Container ; préférez faire la préparation des données dans un selector, appelé dans le Container (rappeler qu'un Container souscrit aux modifications du store, et est donc réexécuté à chaque modification de celui-ci... impact sur les perfs)
 
 
-
+~~~
 ### nommage
 - selectors commencent par get
 - actionCreators: addUser
 - action types: NOM_VERBE (ex: USER_ADD), pour namespacer les actions
 
 
-
+~~~
 ### ducks
 préconisation de structuration des éléments Redux: rassemblement du reducer, des types, et des actionCreators dans un seul fichier par périmètre fonctionnel.
 https://github.com/erikras/ducks-modular-redux
@@ -205,6 +206,7 @@ Une même action peut faire réagir plusieurs reducers. Exemple:
 - uiReducer: qui va fermer le formulaire
 - articleReducer: qui va mettre à jour la date de dernier commentaire
 
+~~~
 ### NE PAS modifier un objet imbriqué du state
 TODO: take examples from https://redux.js.org/recipes/structuring-reducers/immutable-update-patterns
 
@@ -213,7 +215,7 @@ TODO: take examples from https://redux.js.org/recipes/structuring-reducers/immut
 - librairie garantissant l'absence de mutation du state, Immutable-js par exemple
 
 
-
+~~~
 ### Tests
 - tester les reducers est simple (fonction pure).
 - possibilité de tester par duck: (TODO exemple)
@@ -249,14 +251,14 @@ const reducer = (state = {}, action) {
 - utiliser deepFreeze sur le state dans chaque test, pour s'assurer qu'on conserve l'immutabilité du state. Ne pas le faire en prod pour son coût.
 
 
-
+~~~
 ### ? tout dans le store ? Des states locaux ?
 Débat non tranché ; certains considèrent qu'il faut tout mettre dans le store pour une meilleure visibilité de l'état général de l'appli,
 d'autres considèrent qu'on ne met dans le store que ce qui va être partagé par d'autres composants...
 "Un composant vraiment autonome qu'on se verrait pousser sur github => state local"
 
 
-
+~~~
 ### librairies et outils connexes
 - redux devtools et le time travelling (démo)
 - reselect
@@ -266,13 +268,22 @@ d'autres considèrent qu'on ne met dans le store que ce qui va être partagé pa
 - redux-undo
 
 
-
+///
 ### si vous ne deviez retenir que ça...
 
 - With great power comes great responsibility
 - faire preuve de pragmatisme ; comme en tout, ne pas appliquer de règles sans discernement ni sans les comprendre
 
+~~~
+### remerciements
+@jibees
+@shprink
+@mab
+@lelex
+@zelia // vérifier
+...
 
+~~~
 ### ressources
 * [Site officiel](http://redux.js.org)
 * [The complete redux book](https://camo.githubusercontent.com/e2d8c7d2793f36e8ef5a5ec942ff0f6d1333a873/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f7469746c6570616765732e6c65616e7075622e636f6d2f72656475782d626f6f6b2f6865726f3f3134373639373939333725323025374325323077696474683d323030)
