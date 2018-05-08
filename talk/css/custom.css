@@ -1,7 +1,25 @@
+
 section.only-image.present {
     height: 100%;
 }
 section.only-image p {
     display: block;
     height: 50vh;
+}
+
+.slide-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 100px;
+    border: unset !important;
+	background-color: transparent !important;
+}
+
+.reveal > .slides section.present[data-markdown-parsed=true] {
+	display: flex !important;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
 }

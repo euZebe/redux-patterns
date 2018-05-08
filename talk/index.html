@@ -31,8 +31,8 @@
   <div class="slides">
     <section
       data-markdown="resources/content.md"
-      data-separator="^\n\n\n"
-      data-separator-vertical="^\n\n"
+	  data-separator="^///$"
+	  data-separator-vertical="^~~~$"
       data-separator-notes="^Note:"
     >
     </section>
@@ -43,22 +43,24 @@
 <script src="lib/js/head.min.js"></script>
 <script src="js/reveal.js"></script>
 
-<script>
-  // More info about config & dependencies:
-  // - https://github.com/hakimel/reveal.js#configuration
-  // - https://github.com/hakimel/reveal.js#dependencies
-  Reveal.initialize({
-    dependencies: [
-      { src: 'plugin/markdown/marked.js' },
-      { src: 'plugin/markdown/markdown.js' },
-      { src: 'plugin/notes/notes.js', async: true },
-      {
-        src: 'plugin/highlight/highlight.js', async: true, callback: function () {
-          hljs.initHighlightingOnLoad();
-        }
-      }
-    ]
-  });
-</script>
+		<script>
+
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/notes/notes.js' }
+				]
+			});
+
+		</script>
 </body>
 </html>

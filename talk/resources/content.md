@@ -1,46 +1,48 @@
-## Redux
-#### bonnes et moins bonnes pratiques
+﻿# Redux
+## bonnes et moins bonnes pratiques
 
-
-### les bases
-![](resources/transistor.png)
-- librairie JS
+~~~
+## les bases
+![](resources/transistor-transparent.png) <!-- .element: class="slide-icon" -->
+- librairie JS 
 - indépendante
 - gérant l'état de l'application
 
 Note:
 - indépendante de toute lib et de tout framework
 
-
-### 3 principes
+~~~
+## 3 principes
 1. single source of truth
-1. state is read only
-1. changes are made with pure functions (reducers)
+1. _state_ en lecture seule
+1. changements de _state_ par functions pure (_reducers_)
 
 Note:
 1. le _store_ est le garant de l'état de l'application. A aucun moment on ne doit modifier une donnée présente dans le store.
 1. ne mutez pas une partie du state là où vous l'accédez ; la seule façon de changer le state est en émettant une action, qui générera un nouvel état.
 
-
+~~~
+## fonction pure / impure
 ```javascript
 // impure
-const ext = 2;
-function addToC(value) {
-  return value + ext; // dépend d'un contexte, ext
+const counter = 2;
+function addToCounter(value) {
+  return value + counter; // dépend d'un contexte, counter
 }
 
 // pure
-function add4(value) {
-  return value + 4;
+function withVAT(value) {
+  return value * 1.206;
 }
 ```
 
 
-
-### illustration du principe: Mölkky
+///
+### illustration du principe :
+### le Mölkky
 Note: rappeler les règles brièvement
 
-
+~~~
 #### state
 <!-- .slide: class="only-image" -->
 ![initialState](resources/initialState.jpg)
@@ -59,19 +61,19 @@ Note: mettre image SVG des quilles + score des joueurs + nb de ratés
     (_3)    (10)
       (_1)
 
-
+~~~
 #### action
 ![action](resources/action.jpg)
 
-
+~~~
 #### reducer
 ![reducer](resources/gears.jpg)
 
-
+~~~
 #### listeners
 ![listeners](resources/listeners.jpg) // TODO: joueurs + supporters
 
-
+~~~
 #### store
 - 2 connecteurs (fonctions _subscribe_ et _dispatch_)
 - le.s reducer.s
@@ -104,23 +106,23 @@ action:
 Une action est rarement créée à la main, mais souvent instanciée à partir d'un actionCreator (picto écrivain)
 
 
-
+///
 ### est-ce le meilleur gestionnaire d'état ?
 "je ne crois pas qu'il y ait de bonne ou de mauvaise situation"
 le but n'est pas de dire que que redux est mieux ou moins bien que telle ou telle solution de gestion d'état,
 elle a ses inconvénients et ses avantages ; elle reste néanmoins une librairie très utilisée et qu'il est bon de maîtriser pour l'exploiter au mieux
 
 
-
+///
 ### objectif de la présentation:
 montrer quelques bonnes et mauvaises pratiques (mettre en lumière certaines pratiques ?)
 
 
-
+///
 ## bonnes pratiques
 
 
-
+///
 ### structuration du store
 - définir "normalisation" des données (Think of the app’s state as a database.) => séparer les articles de blogs, les auteurs et les commentaires dans des morceaux différents du store.
 - dictionnaire (hashmap de things dans thingById) plutôt que tableaux (pour accéder à l'élément avec l'ID X, il faut alors faire un array.find() plutôt qu'un dictionnaire[x])
