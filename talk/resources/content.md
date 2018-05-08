@@ -40,33 +40,40 @@ function withVAT(value) {
 ///
 ### illustration du principe :
 ### le Mölkky
+<!-- .slide: class="only-image" -->
+![initial state](resources/initialState.jpg)
+![new state](resources/newState.jpg)
+
 Note: rappeler les règles brièvement
 
 ~~~
 #### state
-<!-- .slide: class="only-image" -->
-![initialState](resources/initialState.jpg)
-![initialState](resources/newState.jpg)
-
-Note: mettre image SVG des quilles + score des joueurs + nb de ratés
-    (_7)(_8)(_9)                Alice:  { score: 0, ratés: 0 }
-  (_5)(11)(12)(_6)              Bob:    { score: 0, ratés: 0 }
+📄 <!-- .element: class="slide-icon" -->
+```
+    (_7)(_8)(_9)            Alice:  { score: 0, ratés: 0 }
+  (_5)(11)(12)(_6)          Bob:    { score: 0, ratés: 0 }
     (_3)(10)(_4)
       (_1)(_2)
-
-                (_4)
- (11)       (_2)
-    (_7) (_8)     (_9)          Alice: { score: 26, ratés: 0 }
-  (_5)  (12)   (_6)             Bob: { score: 12, ratés: 2 }
-    (_3)    (10)
-      (_1)
-
+```
+```
+      (_9)                  Alice:  { score: 26, ratés: 0 }
+ (_2)       (_8)            Bob:    { score: 12, ratés: 2 }
+               (12) 
+                 (_4) 
+                 (_5)
+			   
+    (_7) 
+ (_3)	(11)    (_6)
+          (10)   (_4)
+```
 ~~~
 #### action
+![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
 ![action](resources/action.jpg)
 
 ~~~
 #### reducer
+![throw](resources/gears.png)<!-- .element: class="slide-icon" -->
 ![reducer](resources/gears.jpg)
 
 ~~~
