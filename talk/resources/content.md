@@ -105,17 +105,113 @@ les _Reducers_ traitent cette action pour générer un nouveau
 ---( _State_ )--->
 les Listeners sont notifiées d'une modification du store (et se rafraichissent par exemple, s'il s'agit de vues).
 
-TODO: montrer un exemple de code (sans React dedans)
 
-action:
-```
-{
-  type: 'SONG_ADD',
-  payload: { title: "Exogenesis", year:2010, authorID: "2842" },
+~~~
+## et en pratique
+### createStore
+```javascript
+import { createStore } from 'redux';
+
+const action = {
+  type: 'INIT_SCORES_SHEET',
+  players: ['Alice', 'Bob']
+};
+
+function initGame(players) {
+  // TODO: check no duplicates
+  return {
+    type: 'INIT_SCORES_SHEET',
+    players, // same as players: players
+  };
 }
-```
-Une action est rarement créée à la main, mais souvent instanciée à partir d'un actionCreator (picto écrivain)
 
+function throw(fallenPins = [], player) {
+  return {
+    type: 'THROW',
+    player,
+    fallenPins,
+  };
+}
+
+function rootReducer(state = {}, action) {
+  switch (action.type) {
+    
+    case 'INIT_SCORES_SHEET':
+      return action.players.reduce((aggregator, player) => {
+        aggregator[player] = {
+            name: player,
+            score: 0,
+            consecutiveFailures: 0,
+          };
+        return aggregator;
+      }), {});
+      
+    case 'THROW':
+      const { player } = action;
+      const previousPlayerState = state[player];
+
+      // no pin falled
+      if (!fallenPins.length) { 
+        const nextPlayerState = {
+          ...previousPlayerState,
+          consecutiveFailures: previousPlayerState.consecutiveFailures + 1, // pas de ++, on ne modifie pas previousPlayerState
+        };
+        return {
+          ...state,
+          [player]: nextPlayerState
+        };
+      }
+      
+      // one pin falled
+      if (fallenPins.length === 1) {
+        const nextPlayerState = {
+          ...previousPlayerState,
+          score: previousPlayerState.score + fallenPins[0]
+        };
+        return {
+          ...state,
+          [player]: nextPlayerState
+        };        
+      }
+
+      // else, several pins falled
+      const nextPlayerState = {
+        ...previousPlayerState,
+        score: previousPlayerState.score + fallenPins.length
+      };
+      return {
+        ...state,
+        [player]: nextPlayerState
+      };
+      
+    default:
+      return state;
+  }
+}
+
+// init store
+const store = createStore(rootReducer);
+
+// define listeners
+function logListener(content) {
+  console.log(content);
+}
+
+// store.subscribe returns a function to unregister the listener
+const unsubscribe = store.subscribe(logListener);
+
+store.dispatch(initGame(['Alice', 'Bob']);
+store.dispatch(throw([12, 4, 6, 2], 'Alice');
+store.dispatch(throw([], 'Bob');
+store.dispatch(throw([11], 'Alice');
+store.dispatch(throw([], 'Bob');
+store.dispatch(throw([], 'Alice');
+store.dispatch(throw([3, 6, 7, 1, 10, 12], 'Bob');
+
+```
+Note: on pourrait avoir comme listener un composant graphique, une fonction qui stocke les modifications en base de données ou dans le localStorage...
+
+// TODO: redécouper l'exemple en plusieurs slides avec le picto pour chaque partie concernée
 
 ///
 ## la meilleure solution de gestion d'état ?
@@ -271,17 +367,14 @@ d'autres considèrent qu'on ne met dans le store que ce qui va être partagé pa
 ///
 ### si vous ne deviez retenir que ça...
 
-- With great power comes great responsibility
-- faire preuve de pragmatisme ; comme en tout, ne pas appliquer de règles sans discernement ni sans les comprendre
+- ![great responsibility](resources/with-great-power.jpg)
+- pragmatisme
+
+Note: comme en tout, ne pas appliquer de règles sans discernement ni sans les comprendre
 
 ~~~
 ### remerciements
-@jibees
-@shprink
-@mab
-@lelex
-@zelia // vérifier
-...
+Jean-Baptste, Alexandra, Julien, Zélia, Silvère, mab, Thibault
 
 ~~~
 ### ressources
