@@ -12,6 +12,7 @@
 
 Note:
 - indépendante de toute lib et de tout framework
+- "état": données mises en cache, route active de l'appli, onglet sélectionné, langue courante.....
 
 ~~~
 ## 3 principes
@@ -20,8 +21,8 @@ Note:
 1. changements de _state_ par functions pure (_reducers_)
 
 Note:
-1. le _store_ est le garant de l'état de l'application. A aucun moment on ne doit modifier une donnée présente dans le store.
-1. ne mutez pas une partie du state là où vous l'accédez ; la seule façon de changer le state est en émettant une action, qui générera un nouvel état.
+1. L'état de l'application est défini par un seul objet, géré par un _store_ unique.
+2. ne mutez pas une partie du state là où vous l'accédez ; la seule façon de changer le state est en émettant une action, qui donne lieu à un nouvel état.
 
 ~~~
 ## fonction pure / impure
@@ -212,6 +213,7 @@ store.dispatch(throw([3, 6, 7, 1, 10, 12], 'Bob');
 Note: on pourrait avoir comme listener un composant graphique, une fonction qui stocke les modifications en base de données ou dans le localStorage...
 
 // TODO: redécouper l'exemple en plusieurs slides avec le picto pour chaque partie concernée
+// TODO: quel est le contenu envoyé au listener lors d'un nouveau state
 
 ///
 ## la meilleure solution de gestion d'état ?
@@ -220,23 +222,32 @@ Note: on pourrait avoir comme listener un composant graphique, une fonction qui 
 Note: le but n'est pas de dire que que redux est mieux ou moins bien que telle ou telle solution de gestion d'état, elle a ses inconvénients et ses avantages ; elle reste néanmoins une librairie très utilisée et qu'il est bon de maîtriser pour l'exploiter au mieux
 
 
-
 ///
 ## objectif de la présentation
 => mettre en lumière certaines pratiques
 
 
 ~~~
-### structuration du store
-- définir "normalisation" des données (Think of the app’s state as a database.) => séparer les articles de blogs, les auteurs et les commentaires dans des morceaux différents du store.
-- dictionnaire (hashmap de things dans thingById) plutôt que tableaux (pour accéder à l'élément avec l'ID X, il faut alors faire un array.find() plutôt qu'un dictionnaire[x])
-- dissocier data de l'UI, ne pas structurer son store en fonction de l'UI
-- éviter la duplication (par exemple un dictionnaire d'objets session ET un objet currentSession => Quid de la MaJ de ladite session ?
-- normalisation (aplatir son schéma) pour une accessibilité plus aisée aux données (exemple d'un article de blog avec des commentaires et des commentateurs)
-- éviter les nested states, qui
-  * complexifient le reducer, et
-  * recharger trop de composants puisqu'on met à jour tout le super-state en modifiant un sous-state
+### structuration du _state_
+- "normaliser" les données <!-- .element: class="fragment" data-fragment-index="1" -->
+- <!-- .element: class="fragment" data-fragment-index="2" --> 
+  ~~duplication~~ <!-- .element: class="fragment" data-fragment-index="2" -->
+- ne pas structurer son store en fonction de l'UI <!-- .element: class="fragment" data-fragment-index="3" -->
 
+Note: 
+- normaliser => aplatir son schéma. Considérez votre état d'application comme une base de données 
+  * séparer les articles de blogs, les auteurs et les commentaires dans des "collections" différentes du _state_.
+- exemple: dictionnaire d'objets session ET un objet currentSession => Quid de la MaJ de ladite session ?
+- un changement de structure UI ne devrait pas changer la structure du _state_
+
+~~~
+### structuration du _state_, épisode II
+#### ~~états imbriqués~~
+- complexifient le reducer, et <!-- .element: class="fragment" -->
+- recharger trop de composants puisqu'on met à jour tout le super-state en modifiant un sous-state <!-- .element: class="fragment" -->
+
+~~~
+### illustration des états imbriqués
 ```javascript
 reducer(state = {}, action) {
   switch(action.type){
@@ -251,34 +262,73 @@ reducer(state = {}, action) {
   }
 }
 ```
+Note: 
 TODO: faire un exemple (en pur JS + redux) avec des console.log dans les subscribers à plusieurs niveaux du state, puis normaliser le state et montrer la différence.
-- gérer les listes par un index: des attributs d'un objet dont les clés sont les identifiants des objets listés (hashmap) => exemple usersById (object) et usersByCountry  (tableau de UserID)... (ou mieux, utilisez des selectors)
-
 
 ~~~
-### Selector (picto)
-un sélecteur, comme son nom l'indique, permet de sélectionner des données d'un state. Il s'agit d'une fonction (pure) qui prend la forme suivante:
-```
-// (state, props?) => Object
+### structuration du _state_, épisode III
+- dictionnaire (hashmap&lt;id, value>) plutôt que tableau
+
+Note: 
+pour accéder à l'élément avec l'ID X, il faut alors faire un coûteux array.find() plutôt qu'un dictionnaire[x]
+
+~~~
+### illustration du dictionnaire
+liste de pays triés par population
+```javascript
 const state = {
-  songsById: {
-    1: { title: "Shine", year: 2001, authorID: "2842" }
-    2: { title: "Feeling good", year: 2001, authorID: "2842" }
+  countries: {
+    CN: { name: "China", population: 1381943057 },
+    ID: { name: "Indonesia", population: 264905894 },
+    IN: { name: "India", population: 1347781156 },
+    US: { name: "United States", population: 327163096 },
   },
-  authorsById: {
-    2842: { name: "Muse", fromYear: 1999 }
-  },
+  countriesByPopulationDesc: [CN, IN, US, ID],
 };
+``` 
 
-const getSongs = state => state.songsById
-const getSongsSortedByName = state => getSongs(state).sort((a, b) => a.title < b.title)
+Note: permet l'accès rapide au détail d'un pays (sans avoir à faire de countries.find()), et un accès rapide aux tris. Pb: si un pays est ajouté, il faut penser à MaJ le dictionnaire ET le.s tableau.x
 
+~~~
+### Selector 
+🔎<!-- .element: class="slide-icon" -->
+
+- permet de sélectionner quelques données d'un state
+
+```javascript
+const getCountries = state => state.countries;
+
+function getCountriesByPopulationDesc(state) {
+  return getCountries(state).sort(
+    (a, b) => a.population - b.population
+  );
+}
 ```
-=> utiliser des selectors PARTOUT où vous accédez au state, pour rendre votre modèle plus aisément modifiable. Si on veut modifier l'organisation de notre store, par exemple renommer songsById par songs dans l'exemple précédent, il n'y a qu'à le modifier dans le reducer et dans le selector ; tous les composants utilisant le selector récupéreront alors la donnée au bon nouvel endroit. Idem pour tous les selectors dérivés.
+- permet de s'affranchir des index 👍 <!-- .element: class="fragment" -->
+- recalcule l'index à chaque fois qu'on y accède 👎 <!-- .element: class="fragment" -->
 
-Dans la doc Redux, il est proposé une organisation par catalogue + indexes. Reselect permet de s'affranchir des indexes... en créant des sélecteurs mémorisés pour tout ce qui est calculé ; le sélecteur n'est réévalué que lorsqu'un paramètre d'entrée change
-- => reselect et la mémorisation
+Note:
+- selectors PARTOUT => forme de state plus aisément modifiable. Ex: pour renommer _countries_ par _mostPopulatedCountries_, il n'y a qu'à le modifier dans le reducer et dans l'unique selector pour cet attribut ; tous les sélecteurs dérivés (getCountriesByPopulationDesc) et composants utilisant le selector récupéreront alors la donnée au bon nouvel endroit. 
 
+~~~
+### Reselect (librairie)
+🔎<!-- .element: class="slide-icon" -->
+
+
+sélecteurs mémorisés: sélecteur réévalué qu'au changement d'un paramètre d'entrée
+```javascript
+import { createSelector } from 'reselect';
+
+const getCountries = state => state.countries;
+
+const getCountriesByPopulationDesc = createSelector(
+  getCountries,
+  countries => countries.sort(
+    (a, b) => a.population - b.population
+  );
+}
+```
+Note:
 - Pour un composant React par exemple, éviter de calculer des données (sort, filter, map, reduce...) dans le render d'un composant ou dans le mapStateToProps du Container ; préférez faire la préparation des données dans un selector, appelé dans le Container (rappeler qu'un Container souscrit aux modifications du store, et est donc réexécuté à chaque modification de celui-ci... impact sur les perfs)
 
 
