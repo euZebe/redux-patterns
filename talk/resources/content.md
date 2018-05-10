@@ -267,33 +267,32 @@ TODO: faire un exemple (en pur JS + redux) avec des console.log dans les subscri
 
 ~~~
 ### structuration du _state_, épisode III
-- dictionnaire (hashmap&lt;id, value>) plutôt que tableau
+dictionnaire (hashmap&lt;id, value>) plutôt que tableau
 
-Note: 
-pour accéder à l'élément avec l'ID X, il faut alors faire un coûteux array.find() plutôt qu'un dictionnaire[x]
+exemple: liste de pays triée par population <!-- .element: class="fragment" -->
 
-~~~
-### illustration du dictionnaire
-liste de pays triés par population
 ```javascript
 const state = {
   countries: {
-    CN: { name: "China", population: 1381943057 },
-    ID: { name: "Indonesia", population: 264905894 },
-    IN: { name: "India", population: 1347781156 },
-    US: { name: "United States", population: 327163096 },
+    CN: {id: 'CN', name: 'China', population: 1381943057},
+    ID: {id: 'ID', name: 'Indonesia', population: 264905894},
+    IN: {id: 'IN', name: 'India', population: 1347781156},
+    US: {id: 'US', name: 'United States', population: 327163096},
   },
-  countriesByPopulationDesc: [CN, IN, US, ID],
+  countriesByPopulationDesc: ['CN', 'IN', 'US', 'ID'],
 };
 ``` 
-
-Note: permet l'accès rapide au détail d'un pays (sans avoir à faire de countries.find()), et un accès rapide aux tris. Pb: si un pays est ajouté, il faut penser à MaJ le dictionnaire ET le.s tableau.x
+<!-- .element: class="fragment" -->
+Note: 
+- permet l'accès rapide au détail d'un pays (sans avoir à faire de countries.find() de + en + coûteux avec le nb croissant d'éléments), et un accès rapide aux tris. 
+- /!\ si un pays est ajouté, il faut penser à MaJ le dictionnaire ET le.s tableau.x => mieux: selector
 
 ~~~
 ### Selector 
 🔎<!-- .element: class="slide-icon" -->
 
 - permet de sélectionner quelques données d'un state
+- API d'accès au state de votre application
 
 ```javascript
 const getCountries = state => state.countries;
@@ -309,13 +308,14 @@ function getCountriesByPopulationDesc(state) {
 
 Note:
 - selectors PARTOUT => forme de state plus aisément modifiable. Ex: pour renommer _countries_ par _mostPopulatedCountries_, il n'y a qu'à le modifier dans le reducer et dans l'unique selector pour cet attribut ; tous les sélecteurs dérivés (getCountriesByPopulationDesc) et composants utilisant le selector récupéreront alors la donnée au bon nouvel endroit. 
+- la façon de structurer le state devient un détail d'implémentation.
 
 ~~~
 ### Reselect (librairie)
 🔎<!-- .element: class="slide-icon" -->
 
 
-sélecteurs mémorisés: sélecteur réévalué qu'au changement d'un paramètre d'entrée
+sélecteurs mémorisés, et réévalués qu'au changement d'un paramètre d'entrée
 ```javascript
 import { createSelector } from 'reselect';
 
@@ -331,19 +331,12 @@ const getCountriesByPopulationDesc = createSelector(
 Note:
 - Pour un composant React par exemple, éviter de calculer des données (sort, filter, map, reduce...) dans le render d'un composant ou dans le mapStateToProps du Container ; préférez faire la préparation des données dans un selector, appelé dans le Container (rappeler qu'un Container souscrit aux modifications du store, et est donc réexécuté à chaque modification de celui-ci... impact sur les perfs)
 
-
-~~~
-### nommage
-- selectors commencent par get
-- actionCreators: addUser
-- action types: NOM_VERBE (ex: USER_ADD), pour namespacer les actions
-
-
 ~~~
 ### ducks
-préconisation de structuration des éléments Redux: rassemblement du reducer, des types, et des actionCreators dans un seul fichier par périmètre fonctionnel.
-https://github.com/erikras/ducks-modular-redux
-Export nommé pour les actionCreators et les sélecteurs, export par défaut du reducer
+- préconisation de structuration des éléments Redux
+- regrouper au sein d'un fichier par périmètre fonctionnel reducer, types, et actionCreators.
+- Export nommé pour les actionCreators et les sélecteurs, export par défaut du reducer
+
 ==> EN GARDANT BIEN A L'ESPRIT QUE...
 ### mapping action - reducer: 1-n
 Une même action peut faire réagir plusieurs reducers. Exemple:
