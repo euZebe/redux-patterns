@@ -391,16 +391,57 @@ const reducer = (state = {}, action) {
 
 
 ~~~
-### ? tout dans le store ? Des states locaux ?
-Débat non tranché ; certains considèrent qu'il faut tout mettre dans le store pour une meilleure visibilité de l'état général de l'appli,
-d'autres considèrent qu'on ne met dans le store que ce qui va être partagé par d'autres composants...
-"Un composant vraiment autonome qu'on se verrait pousser sur github => state local"
+### global state
+###### vs
+### local (component) state
+📄 <!-- .element: class="slide-icon" -->
+Note: Débat non tranché
+##### tout mettre dans le store
+- meilleure visibilité de l'état global de l'appli,
+- possibilité d'utiliser toute la puissance de Redux (time traveling notamment)
+##### __you might not need redux__
+- on ne met dans le store que ce qui va être partagé par d'autres composants...
+- cf. talk de @MoOx
+
+~~~
+### redux-thunk
+![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
+- thunk: action de type 'function' <!-- .element: class="fragment" -->
+- accès au state entier <!-- .element: class="fragment" -->
+- multiples dispatch possibles <!-- .element: class="fragment" -->
+- appels asynchrones possibles (Promise.then(dispatch).catch(dispatch)) <!-- .element: class="fragment" -->
 
 
 ~~~
+### redux-thunk example
+```javascript
+function validateAndCloseForm(formValues) {
+  return (dispatch, getState) => {
+    const previousState = getState();
+
+    dispatch({ type: 'VALIDATE_FORM', formValues });
+    //dispatch is synchronous => getState() gets the new state
+    const intermediateState = getState();
+
+    dispatch({ type: 'CLOSE_FORM', id: formValues.id });
+    const finalState = getState();
+    
+    // previousState !== intermediateState !== finalState
+  }
+}
+```
+
+~~~
+### redux devtools
+![](https://media.giphy.com/media/yPO3Yxx3jRSlG/giphy_s.gif)
+- visualisation des actions exécutées <!-- .element: class="fragment" -->
+- déclenchement d'une action à la main <!-- .element: class="fragment" -->
+- voyage dans le temps <!-- .element: class="fragment" -->
+
+Note:
+cas d'usage: un message d'info qui disparaît au bout de 3 secondes
+~~~
 ### librairies et outils connexes
-- redux devtools et le time travelling (démo)
-- reselect
 - redux-thunk pour des actionCreators plutôt que des actions => accès au state et au dispatch
 - ? redux-saga
 - ? normalizr (pour convertir une réponse d'API par exemple, en de la donnée normalisée ?)

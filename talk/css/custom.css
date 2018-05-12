@@ -15,11 +15,3 @@ section.only-image p {
     border: unset !important;
 	background-color: transparent !important;
 }
-
-.reveal > .slides section.present[data-markdown-parsed=true] {
-	display: flex !important;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	height: 100vh;
-}
