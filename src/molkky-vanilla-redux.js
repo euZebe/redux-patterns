@@ -72,6 +72,8 @@ function rootReducer(state = {}, action) {
       }
 
       // else, several pins falled
+
+      // TODO: toggle this block and the next one to make reducer unpure
       const nextPlayerState = {
         ...previousPlayerState,
         score: previousPlayerState.score + fallenPins.length,
@@ -83,6 +85,18 @@ function rootReducer(state = {}, action) {
         [player]: nextPlayerState
       };
 
+      // FIXME: unpure reducer: state mutated => audience and referee won't see the action
+      // state[player].score += fallenPins.length;
+      // state[player].consecutiveFailures = 0;
+      // state.fallenPins = fallenPins.length;
+      // return state;
+
+      // FIXME: unpure reducer: nested state mutated => player listener won't see the action
+      // const nextState = { ...state, fallenPins: fallenPins.length };
+      // nextState[player].consecutiveFailures = 0;
+      // nextState[player].score += fallenPins.length;
+      // return nextState;
+
     default:
       return state;
   }
@@ -91,32 +105,52 @@ function rootReducer(state = {}, action) {
 // init store
 const store = createStore(rootReducer);
 
-// define listeners
+/**
+ * Listener which keeps a cache of the player state, executing itself only on new player state
+ * @param name
+ * @returns {Function}
+ * @constructor
+ */
 function PlayerListener(name) {
+  let cachedState = store.getState()[name];
   return () => {
     const playerState = store.getState()[name];
-    if (playerState) {
+    if (playerState !== cachedState) {
       console.log(`${name}: ${playerState.score}, ${playerState.consecutiveFailures} échecs en cours`);
     }
+    cachedState = playerState;
   }
 }
 
 const AliceListener = PlayerListener('Alice');
 const BobListener = PlayerListener('Bob');
 
+/**
+ * function which keeps a cache of the currentState, updated at the end of the
+ * @returns {Function}
+ */
 function crowd() {
-  const fallenPinsOnLastThrow = store.getState().fallenPins;
-  if (fallenPinsOnLastThrow) {
-    console.log('👏👏 audience applauses 👏👏\n');
-  } else {
-    console.log('😞😞\n');
+  let cachedState = store.getState();
+  return () => {
+    const nextState = store.getState();
+    if (nextState !== cachedState) {
+      const fallenPinsOnLastThrow = nextState.fallenPins;
+      if (fallenPinsOnLastThrow) {
+        console.log('👏👏 audience applauses 👏👏\n');
+      } else {
+        console.log('😞😞\n');
+      }
+    } else {
+      console.log('\t\t\t/!\\TOUTE L\'ASSISTANCE AVAIT-ELLE LES YEUX FERMÉS ??');
+    }
+    cachedState = nextState;
   }
 }
 
 // store.subscribe returns a function to unregister the listener
 const unsubscribeAliceListener = store.subscribe(AliceListener);
 const unsubscribeBobListener = store.subscribe(BobListener);
-store.subscribe(crowd);
+store.subscribe(crowd());
 
 store.dispatch(initGame(['Alice', 'Bob']));
 store.dispatch(throwPin([12, 4, 6, 2], 'Alice'));

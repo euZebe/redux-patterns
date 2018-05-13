@@ -1,6 +1,13 @@
 ﻿# Redux
 ## bonnes et moins bonnes pratiques
 
+~~~
+## objectifs de la présentation
+- introduire Redux
+- mettre en lumière certaines pratiques
+
+Note: en se concentrant sur Redux, et non sur le couple React + Redux
+
 ///
 ## les bases
 ![](resources/transistor-transparent.png) <!-- .element: class="slide-icon" -->
@@ -16,7 +23,7 @@ Note:
 
 ~~~
 ## 3 principes
-1. single source of truth
+1. _single source of truth_
 1. _state_ en lecture seule
 1. changements de _state_ par functions pure (_reducers_)
 
@@ -245,18 +252,14 @@ Note: on pourrait avoir comme listener un composant graphique, une fonction qui 
 
 ///
 ## la meilleure solution de gestion d'état ?
-![otis](resources/bonne-ou-mauvaise-solution.jpg)<!-- .element: class="fragment" data-fragment-index="1" -->
+![otis](resources/bonne-ou-mauvaise-solution.jpg)<!-- .element: class="fragment" -->
 
 Note: le but n'est pas de dire que que redux est mieux ou moins bien que telle ou telle solution de gestion d'état, elle a ses inconvénients et ses avantages ; elle reste néanmoins une librairie très utilisée et qu'il est bon de maîtriser pour l'exploiter au mieux
 
 
 ///
-## objectif de la présentation
-=> mettre en lumière certaines pratiques
-
-
-~~~
 ### structuration du _state_
+📄 <!-- .element: class="slide-icon" -->
 - "normaliser" les données <!-- .element: class="fragment" data-fragment-index="1" -->
 - <!-- .element: class="fragment" data-fragment-index="2" --> 
   ~~duplication~~ <!-- .element: class="fragment" data-fragment-index="2" -->
@@ -269,7 +272,9 @@ Note:
 - un changement de structure UI ne devrait pas changer la structure du _state_
 
 ~~~
-### structuration du _state_, épisode II
+### structuration du _state_
+### épisode II
+📄 <!-- .element: class="slide-icon" -->
 #### ~~états imbriqués~~
 - complexifient le reducer, et <!-- .element: class="fragment" -->
 - recharger trop de composants puisqu'on met à jour tout le super-state en modifiant un sous-state <!-- .element: class="fragment" -->
@@ -294,7 +299,10 @@ Note:
 TODO: faire un exemple (en pur JS + redux) avec des console.log dans les subscribers à plusieurs niveaux du state, puis normaliser le state et montrer la différence.
 
 ~~~
-### structuration du _state_, épisode III
+### structuration du _state_
+### épisode III
+📄 <!-- .element: class="slide-icon" -->
+
 dictionnaire (hashmap&lt;id, value>) plutôt que tableau
 
 exemple: liste de pays triée par population <!-- .element: class="fragment" -->
@@ -365,9 +373,10 @@ Note:
 - regrouper au sein d'un fichier par périmètre fonctionnel reducer, types, et actionCreators.
 - Export nommé pour les actionCreators et les sélecteurs, export par défaut du reducer
 
-==> EN GARDANT BIEN A L'ESPRIT QUE...
-### mapping action - reducer: 1-n
-Une même action peut faire réagir plusieurs reducers. Exemple:
+__Rappel:__ <!-- .element: class="fragment" data-fragment-index="1" -->
+##### mapping action - reducer: 1-n <!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: Une même action peut faire réagir plusieurs reducers. Exemple:
 `dispatch({ type: COMMENT_SUBMIT ... });` peut être traité par
 - commentReducer: qui va ajouter/modifier le commentaire
 - uiReducer: qui va fermer le formulaire
@@ -375,12 +384,27 @@ Une même action peut faire réagir plusieurs reducers. Exemple:
 
 ~~~
 ### NE PAS modifier un objet imbriqué du state
-TODO: take examples from https://redux.js.org/recipes/structuring-reducers/immutable-update-patterns
+```javascript
+function updateNestedState(state, action) {
+    let nestedState = state.nestedState;
+    // ERROR: this directly modifies the existing object reference - don't do this!
+    nestedState.nestedField = action.data;
+​
+    return {
+        ...state,
+        nestedState
+    };
+}
+```
+Note:
+modifier directement dans l'exemple molkky-vanilla
 
 ##### remèdes:
 - rigueur, ou
 - librairie garantissant l'absence de mutation du state, Immutable-js par exemple
 
+Note:
+examples from https://redux.js.org/recipes/structuring-reducers/immutable-update-patterns
 
 ~~~
 ### Tests
