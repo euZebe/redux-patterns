@@ -6,8 +6,7 @@ const action = {
 };
 
 function initGame(players) {
-  console.log("=> jeu initialisé");
-  // TODO: check no duplicates
+  console.log('=> jeu initialisé');
   return {
     type: 'INIT_SCORES_SHEET',
     players, // same as players: players
@@ -16,7 +15,7 @@ function initGame(players) {
 
 function throwPin(fallenPins = [], player) {
   if (fallenPins.length) {
-    console.log(`${player} a fait tomber la/les quille.s ${fallenPins}`);
+    console.log(`${player} a fait tomber la/les quille(s) ${fallenPins}`);
   } else {
     console.log(`${player} n'a fait tomber aucune quille`);
   }

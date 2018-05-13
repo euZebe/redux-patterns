@@ -126,7 +126,6 @@ const action = {
 
 function initGame(players) {
   console.log("=> jeu initialisé");
-  // TODO: check no duplicates
   return {
     type: 'INIT_SCORES_SHEET',
     players, // same as players: players
@@ -247,8 +246,6 @@ store.dispatch(throwPin([3, 6, 7, 1, 10, 12], 'Bob'));
 ```
 Note: on pourrait avoir comme listener un composant graphique, une fonction qui stocke les modifications en base de données ou dans le localStorage...
 
-// TODO: redécouper l'exemple en plusieurs slides avec le picto pour chaque partie concernée
-// TODO: quel est le contenu envoyé au listener lors d'un nouveau state
 
 ///
 ## la meilleure solution de gestion d'état ?
@@ -275,28 +272,42 @@ Note:
 ### structuration du _state_
 ### épisode II
 📄 <!-- .element: class="slide-icon" -->
-#### ~~états imbriqués~~
-- complexifient le reducer, et <!-- .element: class="fragment" -->
-- recharger trop de composants puisqu'on met à jour tout le super-state en modifiant un sous-state <!-- .element: class="fragment" -->
 
-~~~
-### illustration des états imbriqués
+~~états imbriqués~~
 ```javascript
 reducer(state = {}, action) {
   switch(action.type){
-    case 'NESTED_COUNTER_INCREMENT':
+    case 'MAILS_COUNTER_INCREMENT':
       return {
         ...state,
-        subState: {
-          ...state.subState,
-          counter: state.subState.counter + 1,
+        toolbar: {
+          ...state.toolbar,
+          indicators: {
+            ...state.toolbar.indicators,
+            counter: state.toolbar.indicators + 1,
+          },
         },
       };
   }
 }
 ```
-Note: 
-TODO: faire un exemple (en pur JS + redux) avec des console.log dans les subscribers à plusieurs niveaux du state, puis normaliser le state et montrer la différence.
+Note:
+- si l'indicateur n'est plus mis dans la toolbar, l'organisation du state est incohérente => pas d'adhérence à l'UI
+- si incrémentation du compteur de mail, tous les listeners d'une partie de toolbarState seront également rafraichis
+
+~~~
+### structuration du _state_
+### épisode II
+📄 <!-- .element: class="slide-icon" -->
+
+~~états imbriqués~~
+- complexifient le reducer, et <!-- .element: class="fragment" -->
+- rafraîchissent trop de composants <!-- .element: class="fragment" -->
+- ➡ rigueur, ou <!-- .element: class="fragment" -->
+- ➡ librairie garantissant l'absence de mutation du state, Immutable-js par exemple <!-- .element: class="fragment" -->
+
+Note:
+- pb rafraichissement puisqu'on clone l'état imbriqué en modifiant un sous-state
 
 ~~~
 ### structuration du _state_
@@ -305,7 +316,7 @@ TODO: faire un exemple (en pur JS + redux) avec des console.log dans les subscri
 
 dictionnaire (hashmap&lt;id, value>) plutôt que tableau
 
-exemple: liste de pays triée par population <!-- .element: class="fragment" -->
+exemple: liste de pays triée par population <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```javascript
 const state = {
@@ -318,10 +329,10 @@ const state = {
   countriesByPopulationDesc: ['CN', 'IN', 'US', 'ID'],
 };
 ``` 
-<!-- .element: class="fragment" -->
+<!-- .element: class="fragment" data-fragment-index="1" -->
 Note: 
 - permet l'accès rapide au détail d'un pays (sans avoir à faire de countries.find() de + en + coûteux avec le nb croissant d'éléments), et un accès rapide aux tris. 
-- /!\ si un pays est ajouté, il faut penser à MaJ le dictionnaire ET le.s tableau.x => mieux: selector
+- /!\ si un pays est ajouté, il faut penser à MaJ le dictionnaire ET le.s tableau.x ➡ mieux: selector
 
 ~~~
 ### Selector 
@@ -351,7 +362,7 @@ Note:
 🔎<!-- .element: class="slide-icon" -->
 
 
-sélecteurs mémorisés, et réévalués qu'au changement d'un paramètre d'entrée
+sélecteurs mémorisés, et réévalués seulement au changement d'un paramètre d'entrée
 ```javascript
 import { createSelector } from 'reselect';
 
@@ -369,9 +380,11 @@ Note:
 
 ~~~
 ### ducks
-- préconisation de structuration des éléments Redux
-- regrouper au sein d'un fichier par périmètre fonctionnel reducer, types, et actionCreators.
-- Export nommé pour les actionCreators et les sélecteurs, export par défaut du reducer
+📂<!-- .element: class="slide-icon" -->
+
+préconisation de structuration des éléments Redux
+- regrouper au sein d'un fichier par périmètre fonctionnel _reducer_, _types_, et _actionCreators_.
+- Export nommé pour les _actionCreators_ et les _selectors_, export par défaut du _reducer_
 
 __Rappel:__ <!-- .element: class="fragment" data-fragment-index="1" -->
 ##### mapping action - reducer: 1-n <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -383,67 +396,21 @@ Note: Une même action peut faire réagir plusieurs reducers. Exemple:
 - articleReducer: qui va mettre à jour la date de dernier commentaire
 
 ~~~
-### NE PAS modifier un objet imbriqué du state
-```javascript
-function updateNestedState(state, action) {
-    let nestedState = state.nestedState;
-    // ERROR: this directly modifies the existing object reference - don't do this!
-    nestedState.nestedField = action.data;
-​
-    return {
-        ...state,
-        nestedState
-    };
-}
-```
-Note:
-modifier directement dans l'exemple molkky-vanilla
-
-##### remèdes:
-- rigueur, ou
-- librairie garantissant l'absence de mutation du state, Immutable-js par exemple
-
-Note:
-examples from https://redux.js.org/recipes/structuring-reducers/immutable-update-patterns
-
-~~~
 ### Tests
-- tester les reducers est simple (fonction pure).
-- possibilité de tester par duck: (TODO exemple)
+✓❌ <!-- .element: class="slide-icon" -->
 
+- tester les reducers est simple (fonction pure) <!-- .element: class="fragment" -->
+- possibilité de tester par duck <!-- .element: class="fragment" -->
+- ➡ utiliser deepFreeze sur le state dans chaque test <!-- .element: class="fragment" -->
 
-```javascript
-const state = {
-  songsById: {
-    1: { title: "Shine", year: 2001, authorID: "2842" }
-    2: { title: "Feeling good", year: 2001, authorID: "2842" }
-  },
-  authorsById: {
-    2842: { name: "Muse", fromYear: 1999 }
-  },
-};
-
-const getSongs = state => state.songsById
-const getSongsSortedByName = state => getSongs(state).sort((a, b) => a.title < b.title)
-
-const reducer = (state = {}, action) {
-  switch(action.type) {
-    case 'SONG_ADD':
-      const id = shortid.generate();
-      return {
-        ...state,
-        [id]: action.payload,
-      };
-    default:
-      return state;
-  }
-}
-```
-- utiliser deepFreeze sur le state dans chaque test, pour s'assurer qu'on conserve l'immutabilité du state. Ne pas le faire en prod pour son coût.
-
+Note:
+### deepFreeze:
+- garantit l'immutabilité du state.
+- DEMO articles.spec.js et articles.js
+- PAS EN PROD (ou au moyen d'une lib dédiée à l'immutabilité => optimisée)
 
 ~~~
-### global state
+### all in redux state
 ###### vs
 ### local (component) state
 📄 <!-- .element: class="slide-icon" -->
@@ -456,10 +423,10 @@ Note: Débat non tranché
 - cf. talk de @MoOx
 
 ~~~
-### redux-thunk
+### redux-thunk (lib)
 ![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
-- thunk: action de type 'function' <!-- .element: class="fragment" -->
-- accès au state entier <!-- .element: class="fragment" -->
+- _thunk_: action de type 'function'
+- accès au state dans le thunk <!-- .element: class="fragment" -->
 - multiples dispatch possibles <!-- .element: class="fragment" -->
 - appels asynchrones possibles (Promise.then(dispatch).catch(dispatch)) <!-- .element: class="fragment" -->
 
@@ -487,7 +454,7 @@ function validateAndCloseForm(formValues) {
 ### redux-saga
 ![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
 - facilite l'orchestration d'actions complexes et/ou asynchrones
-- easy to test
+- facile à tester
 
 ~~~
 ### redux devtools
@@ -497,25 +464,31 @@ function validateAndCloseForm(formValues) {
 - voyage dans le temps <!-- .element: class="fragment" -->
 
 Note:
-cas d'usage: un message d'info qui disparaît au bout de 3 secondes
+- cas d'usage: un message d'info qui disparaît au bout de 3 secondes
+- DEMO
+
 ~~~
-### librairies et outils connexes
-- ? redux-saga
-- ? normalizr (pour convertir une réponse d'API par exemple, en de la donnée normalisée ?)
+### autres librairies notables
+- normalizr (pour convertir une réponse d'API par exemple, en de la donnée normalisée ?)
 - redux-undo
 
 
 ///
 ### si vous ne deviez retenir que ça...
 
-- ![great responsibility](resources/with-great-power.jpg)
-- pragmatisme
+![great responsibility](resources/with-great-power.jpg) <!-- .element: class="fragment" -->
+- faites preuve de pragmatisme <!-- .element: class="fragment" -->
 
-Note: comme en tout, ne pas appliquer de règles sans discernement ni sans les comprendre
+Note:
+- great responsibility: redux = petite librairie (150 lignes) avec grandes possibilités, dont celle de faire du code sale
+- ne pas appliquer de règles sans discernement ni sans les comprendre
+- j'espère que cette présentation vous aidera à mieux appréhender redux lors de vos prochains projets
 
 ~~~
 ### remerciements
-Jean-Baptste, Alexandra, Julien, Zélia, Silvère, mab, Thibault
+Jean-Baptiste, Alexandra, Julien,
+
+Zélia, Silvère, mab, Thibault
 
 ~~~
 ### ressources
