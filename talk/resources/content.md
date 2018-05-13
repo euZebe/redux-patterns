@@ -414,6 +414,7 @@ Note: Débat non tranché
 
 ~~~
 ### redux-thunk example
+![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
 ```javascript
 function validateAndCloseForm(formValues) {
   return (dispatch, getState) => {
@@ -430,6 +431,11 @@ function validateAndCloseForm(formValues) {
   }
 }
 ```
+~~~
+### redux-saga
+![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
+- facilite l'orchestration d'actions complexes et/ou asynchrones
+- easy to test
 
 ~~~
 ### redux devtools
@@ -442,7 +448,6 @@ Note:
 cas d'usage: un message d'info qui disparaît au bout de 3 secondes
 ~~~
 ### librairies et outils connexes
-- redux-thunk pour des actionCreators plutôt que des actions => accès au state et au dispatch
 - ? redux-saga
 - ? normalizr (pour convertir une réponse d'API par exemple, en de la donnée normalisée ?)
 - redux-undo
@@ -466,3 +471,4 @@ Jean-Baptste, Alexandra, Julien, Zélia, Silvère, mab, Thibault
 * [The complete redux book](https://camo.githubusercontent.com/e2d8c7d2793f36e8ef5a5ec942ff0f6d1333a873/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f7469746c6570616765732e6c65616e7075622e636f6d2f72656475782d626f6f6b2f6865726f3f3134373639373939333725323025374325323077696474683d323030)
 * https://tech.affirm.com/redux-patterns-and-anti-patterns-7d80ef3d53bc
 * https://medium.com/@kylpo/redux-best-practices-eef55a20cc72
+* https://decembersoft.com/posts/redux-thunk-vs-redux-saga/
