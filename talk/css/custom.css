@@ -1,10 +1,11 @@
 
-section.only-image.present {
-    height: 100%;
+section.only-image.present > p {
+    display: flex;
+    text-align: center;
 }
-section.only-image p {
-    display: block;
-    height: 50vh;
+
+section.only-image.present > p > img {
+    height: 40vh;
 }
 
 .slide-icon {
