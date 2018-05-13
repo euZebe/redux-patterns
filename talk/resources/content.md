@@ -84,9 +84,9 @@ reducer: (previousScore, action) => nextScore
 
 ~~~
 ### listeners
+![listeners](resources/supporters.png)<!-- .element: class="slide-icon" -->
 Alice + Bob + supporters
 
-![listeners](resources/supporters.png)
 
 ~~~
 ### store
@@ -109,9 +109,8 @@ les Listeners sont notifiées d'une modification du store (et se rafraichissent 
 
 ~~~
 ## et en pratique
-### createStore
 ```javascript
-import { createStore } from 'redux';
+const { createStore } = require('redux');
 
 const action = {
   type: 'INIT_SCORES_SHEET',
@@ -119,6 +118,7 @@ const action = {
 };
 
 function initGame(players) {
+  console.log("=> jeu initialisé");
   // TODO: check no duplicates
   return {
     type: 'INIT_SCORES_SHEET',
@@ -126,7 +126,12 @@ function initGame(players) {
   };
 }
 
-function throw(fallenPins = [], player) {
+function throwPin(fallenPins = [], player) {
+  if (fallenPins.length) {
+    console.log(`${player} a fait tomber la/les quille.s ${fallenPins}`);
+  } else {
+    console.log(`${player} n'a fait tomber aucune quille`);
+  }
   return {
     type: 'THROW',
     player,
@@ -136,55 +141,60 @@ function throw(fallenPins = [], player) {
 
 function rootReducer(state = {}, action) {
   switch (action.type) {
-    
+
     case 'INIT_SCORES_SHEET':
       return action.players.reduce((aggregator, player) => {
         aggregator[player] = {
-            name: player,
-            score: 0,
-            consecutiveFailures: 0,
-          };
+          name: player,
+          score: 0,
+          consecutiveFailures: 0,
+        };
         return aggregator;
-      }), {});
-      
+      }, {});
+
     case 'THROW':
-      const { player } = action;
+      const { player, fallenPins } = action;
       const previousPlayerState = state[player];
 
       // no pin falled
-      if (!fallenPins.length) { 
+      if (!fallenPins.length) {
         const nextPlayerState = {
           ...previousPlayerState,
           consecutiveFailures: previousPlayerState.consecutiveFailures + 1, // pas de ++, on ne modifie pas previousPlayerState
         };
         return {
           ...state,
-          [player]: nextPlayerState
+          fallenPins: fallenPins.length,
+          [player]: nextPlayerState,
         };
       }
-      
+
       // one pin falled
       if (fallenPins.length === 1) {
         const nextPlayerState = {
           ...previousPlayerState,
-          score: previousPlayerState.score + fallenPins[0]
+          score: previousPlayerState.score + fallenPins[0],
+          consecutiveFailures: 0,
         };
         return {
           ...state,
-          [player]: nextPlayerState
-        };        
+          fallenPins: fallenPins.length,
+          [player]: nextPlayerState,
+        };
       }
 
       // else, several pins falled
       const nextPlayerState = {
         ...previousPlayerState,
-        score: previousPlayerState.score + fallenPins.length
+        score: previousPlayerState.score + fallenPins.length,
+        consecutiveFailures: 0,
       };
       return {
         ...state,
+        fallenPins: fallenPins.length,
         [player]: nextPlayerState
       };
-      
+
     default:
       return state;
   }
@@ -194,21 +204,39 @@ function rootReducer(state = {}, action) {
 const store = createStore(rootReducer);
 
 // define listeners
-function logListener(content) {
-  console.log(content);
+function PlayerListener(name) {
+  return () => {
+    const playerState = store.getState()[name];
+    if (playerState) {
+      console.log(`${name}: ${playerState.score}, ${playerState.consecutiveFailures} échecs en cours`);
+    }
+  }
+}
+
+const AliceListener = PlayerListener('Alice');
+const BobListener = PlayerListener('Bob');
+
+function crowd() {
+  const fallenPinsOnLastThrow = store.getState().fallenPins;
+  if (fallenPinsOnLastThrow) {
+    console.log('👏👏 audience applauses 👏👏\n');
+  } else {
+    console.log('😞😞\n');
+  }
 }
 
 // store.subscribe returns a function to unregister the listener
-const unsubscribe = store.subscribe(logListener);
+const unsubscribeAliceListener = store.subscribe(AliceListener);
+const unsubscribeBobListener = store.subscribe(BobListener);
+store.subscribe(crowd);
 
-store.dispatch(initGame(['Alice', 'Bob']);
-store.dispatch(throw([12, 4, 6, 2], 'Alice');
-store.dispatch(throw([], 'Bob');
-store.dispatch(throw([11], 'Alice');
-store.dispatch(throw([], 'Bob');
-store.dispatch(throw([], 'Alice');
-store.dispatch(throw([3, 6, 7, 1, 10, 12], 'Bob');
-
+store.dispatch(initGame(['Alice', 'Bob']));
+store.dispatch(throwPin([12, 4, 6, 2], 'Alice'));
+store.dispatch(throwPin([], 'Bob'));
+store.dispatch(throwPin([11], 'Alice'));
+store.dispatch(throwPin([], 'Bob'));
+store.dispatch(throwPin([], 'Alice'));
+store.dispatch(throwPin([3, 6, 7, 1, 10, 12], 'Bob'));
 ```
 Note: on pourrait avoir comme listener un composant graphique, une fonction qui stocke les modifications en base de données ou dans le localStorage...
 
