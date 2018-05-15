@@ -1,6 +1,6 @@
 import { createStore } from 'redux';
 import deepFreeze from 'deep-freeze';
-import { createForm, getArticlesSortedByCreationDate, getLastModification } from './articles';
+import { createArticle, getArticlesSortedByCreationDate, getLastModification } from './articles';
 import reducers from './reducers';
 
 describe('articles duck', () => {
@@ -10,7 +10,7 @@ describe('articles duck', () => {
     expect(getLastModification(previousState)).toBeNull();
     expect(getArticlesSortedByCreationDate(previousState)).toHaveLength(0);
 
-    store.dispatch(createForm('mon titre', 'mon contenu'));
+    store.dispatch(createArticle('mon titre', 'mon contenu'));
 
     const nextState = store.getState();
     expect(getLastModification(nextState)).not.toBeNull();

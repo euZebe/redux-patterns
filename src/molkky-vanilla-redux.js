@@ -1,10 +1,5 @@
 const { createStore } = require('redux');
 
-const action = {
-  type: 'INIT_SCORES_SHEET',
-  players: ['Alice', 'Bob']
-};
-
 function initGame(players) {
   console.log('=> jeu initialisé');
   return {

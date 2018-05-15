@@ -1,11 +1,11 @@
 import { connect } from 'react-redux';
 import ArticleForm from './ArticleForm';
-import { createForm } from '../store/articles';
+import { createArticle } from '../store/articles';
 
 const mapStateToProps = () => ({});
 
 const mapDispatchToProps = (dispatch) => ({
-  createForm: (title, body) => dispatch(createForm(title, body)),
+  createForm: (title, body) => dispatch(createArticle(title, body)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ArticleForm);

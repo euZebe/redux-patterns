@@ -11,7 +11,7 @@ const FORM_CREATE = 'FORM_CREATE';
 /*
  * action creators
  */
-export const createForm = (title, body) => ({
+export const createArticle = (title, body) => ({
   type: FORM_CREATE,
   payload: {
     title,
