@@ -305,7 +305,7 @@ Note: le but n'est pas de dire que que redux est mieux ou moins bien que telle o
 ### immutabilité du _state_
 📄 <!-- .element: class="slide-icon" -->
 
-~~modifier un state~~
+~~modifier le _state_~~
 
 Pour prévenir les mutations, <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -313,66 +313,116 @@ rigueur / librairie d'immutabilité <!-- .element: class="fragment" data-fragmen
 
 Note:
 - demo molkky en modifiant le reducer
--
+- immutable-js
 
 ~~~
 ### structuration du _state_
 📄 <!-- .element: class="slide-icon" -->
-- "normaliser" les données <!-- .element: class="fragment" data-fragment-index="1" -->
-- <!-- .element: class="fragment" data-fragment-index="2" -->
-  ~~duplication~~ <!-- .element: class="fragment" data-fragment-index="2" -->
-- ne pas structurer son store en fonction de l'UI <!-- .element: class="fragment" data-fragment-index="3" -->
+
+normaliser les données
+```javascript
+// NOT NORMALIZED
+state = {
+  blogPosts: [
+    {
+      id : "post1",
+      author : {username : "user1", name : "User 1"},
+      body : "......",
+      comments : [
+        {
+          id : "comment1",
+          author : {username : "user2", name : "User 2"},
+          comment : ".....",
+        },
+        {
+          id : "comment2",
+          author : {username : "user3", name : "User 3"},
+          comment : ".....",
+        }
+      ]
+    },
+    {
+      id : "post2",
+      author : {username : "user2", name : "User 2"},
+      body : "......",
+      comments : [
+        {
+          id : "comment3",
+          author : {username : "user3", name : "User 3"},
+          comment : ".....",
+        },
+        {
+          id : "comment4",
+          author : {username : "user1", name : "User 1"},
+          comment : ".....",
+        },
+        {
+          id : "comment5",
+          author : {username : "user3", name : "User 3"},
+          comment : ".....",
+        }
+      ]
+    }
+  ]
+};
+```
 
 Note:
 - normaliser => aplatir son schéma. Considérez votre état d'application comme une base de données
   * séparer les articles de blogs, les auteurs et les commentaires dans des "collections" différentes du _state_.
-- exemple: dictionnaire d'objets session ET un objet currentSession => Quid de la MaJ de ladite session ?
-- un changement de structure UI ne devrait pas changer la structure du _state_
+
 
 ~~~
-### structuration du _state_
-### épisode II
+### structuration du _state_ (II)
+📄 <!-- .element: class="slide-icon" -->
+
+~~structurer son store en fonction de l'UI~~
+```javascript
+state = {
+  // ...
+  toolbar: {
+    indicators: {
+      pendingInvitations: 2,
+      unreadMessages: 5,
+    },
+  },
+};
+```
+
+Note:
+- changement de structure UI => Ø changement de structure du _state_
+
+~~~
+### structuration du _state_ (III)
 📄 <!-- .element: class="slide-icon" -->
 
 ~~états imbriqués~~
 ```javascript
 reducer(state = {}, action) {
   switch(action.type){
-    case 'MAILS_COUNTER_INCREMENT':
+    const { commentID, comment } = action;
+    case 'MODIFY_COMMENT':
       return {
-        ...state,
-        toolbar: {
-          ...state.toolbar,
-          indicators: {
-            ...state.toolbar.indicators,
-            counter: state.toolbar.indicators + 1,
+        ...state, // put references of all articles and authors
+        comments: { // change reference of comments attribute
+          ...state.comments,
+          commentID: {
+            id: commentID,
+            comment,
           },
         },
       };
   }
 }
 ```
-Note:
-- si l'indicateur n'est plus mis dans la toolbar, l'organisation du state est incohérente => pas d'adhérence à l'UI
-- si incrémentation du compteur de mail, tous les listeners d'une partie de toolbarState seront également rafraichis
-
-~~~
-### structuration du _state_
-### épisode II
-📄 <!-- .element: class="slide-icon" -->
-
-~~états imbriqués~~
-- complexifient le reducer, et <!-- .element: class="fragment" -->
-- rafraîchissent trop de composants <!-- .element: class="fragment" -->
-- ➡ rigueur, ou <!-- .element: class="fragment" -->
-- ➡ librairie garantissant l'absence de mutation du state, Immutable-js par exemple <!-- .element: class="fragment" -->
+⚠ rafraîchit trop de composants <!-- .element: class="fragment" -->
 
 Note:
-- pb rafraichissement puisqu'on clone l'état imbriqué en modifiant un sous-state
+- si modif commentaire, ref vers tous les commentaires modifiée => tous les commentaires rafraîchis
+TODO: check this
 
 ~~~
-### structuration du _state_
-### épisode III
+### structuration du _state_ (IV)
 📄 <!-- .element: class="slide-icon" -->
 
 dictionnaire (hashmap&lt;id, value>) plutôt que tableau
