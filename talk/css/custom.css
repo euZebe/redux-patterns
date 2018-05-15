@@ -16,3 +16,8 @@ section.only-image.present > p > img {
     border: unset !important;
 	background-color: transparent !important;
 }
+
+.no-border-image {
+    border: unset !important;
+    background-color: transparent !important;
+}
