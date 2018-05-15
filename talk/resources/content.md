@@ -53,18 +53,17 @@ function addToCounter(value) {
 ~~~
 ## Flux Redux
 
-1. action "dispatchée" dans le store <!-- .element class="fragment" -->
-- le store exécute le reducer <!-- .element class="fragment" -->
-- (oldState, action) => newState <!-- .element class="fragment" -->
-- le store notifie les listeners <!-- .element class="fragment" -->
-
-```
-[action] ➡ [STORE: [reducer] ➡ [state] ] ➡ [listeners]
-```
+![Redux flow](resources/Redux.png) <!-- .element class="no-border-image" -->
 
 Note:
-- flux unidirectionnel
-- reducer peut être une combinaison de plusieurs reducers
+flux unidirectionnel
+
+1. action "dispatchée" dans le store
+- le store exécute le reducer
+- (oldState, action) => newState
+- listeners notifiés d'un possible changement de state
+
+Rappeler contenu du store
 
 ///
 ## illustration du principe :
@@ -111,36 +110,22 @@ fonction pure
 ```
 reducer: (previousScore, action) => nextScore
 ```
+Note: immutable !
 
 ~~~
 ### listeners
-![listeners](resources/supporters.png)<!-- .element: class="slide-icon" -->
+![listeners](resources/supporters.png)<!-- .element class="slide-icon" -->
 Alice + Bob + supporters
-
-
-~~~
-### store
-![listeners](resources/Redux-with-pictos.png)
-
-Note:
-- 2 connecteurs (fonctions _subscribe_ et _dispatch_)
-- le.s reducer.s
-- le state courant
-
-le _Store_ met à disposition un
----( _State_ : l'état actuel de l'application)--->
-Des _Listeners_ souscrivent au modification de ce store (store.subscribe()).
-Une action est
----( ( _dispatch_ ))--->
-les _Reducers_ traitent cette action pour générer un nouveau
----( _State_ )--->
-les Listeners sont notifiées d'une modification du store (et se rafraichissent par exemple, s'il s'agit de vues).
 
 
 ~~~
 ## et en pratique
 ```javascript
 const { createStore } = require('redux');
+
+// -------
+// ACTIONS
+// -------
 
 function initGame(players) {
   console.log('=> jeu initialisé');
@@ -163,6 +148,9 @@ function throwPin(fallenPins = [], player) {
   };
 }
 
+// -------
+// REDUCER
+// -------
 function rootReducer(state = {}, action) {
   switch (action.type) {
 
@@ -238,9 +226,6 @@ function rootReducer(state = {}, action) {
   }
 }
 
-// init store
-const store = createStore(rootReducer);
-
 /**
  * Listener which keeps a cache of the player state, executing itself only on new player state
  * @param name
@@ -277,15 +262,18 @@ function crowd() {
         console.log('😞😞\n');
       }
     } else {
-      console.log('\t\t\t/!\\TOUTE L\'ASSISTANCE AVAIT-ELLE LES YEUX FERMÉS ??');
+      console.log('\t\t\t/!\\ L\'ASSISTANCE N\'A RIEN VU ?!');
     }
     cachedState = nextState;
   }
 }
 
+// init store
+const store = createStore(rootReducer);
+
 // store.subscribe returns a function to unregister the listener
-const unsubscribeAliceListener = store.subscribe(AliceListener);
-const unsubscribeBobListener = store.subscribe(BobListener);
+store.subscribe(AliceListener);
+store.subscribe(BobListener);
 store.subscribe(crowd());
 
 store.dispatch(initGame(['Alice', 'Bob']));
@@ -295,9 +283,13 @@ store.dispatch(throwPin([11], 'Alice'));
 store.dispatch(throwPin([], 'Bob'));
 store.dispatch(throwPin([], 'Alice'));
 store.dispatch(throwPin([3, 6, 7, 1, 10, 12], 'Bob'));
-```
-Note: on pourrait avoir comme listener un composant graphique, une fonction qui stocke les modifications en base de données ou dans le localStorage...
 
+```
+Note: DEMO (parcourir code depuis createStore + exécuter)
+
+Listener:
+- ici: console.log
+- pourrait être composant graphique, fonction de stockage en localStorage / BDD...
 
 ///
 ## la meilleure solution de gestion d'état ?
@@ -307,15 +299,32 @@ Note: le but n'est pas de dire que que redux est mieux ou moins bien que telle o
 
 
 ///
+## Bonnes pratiques
+
+~~~
+### immutabilité du _state_
+📄 <!-- .element: class="slide-icon" -->
+
+~~modifier un state~~
+
+Pour prévenir les mutations, <!-- .element: class="fragment" data-fragment-index="1" -->
+
+rigueur / librairie d'immutabilité <!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note:
+- demo molkky en modifiant le reducer
+-
+
+~~~
 ### structuration du _state_
 📄 <!-- .element: class="slide-icon" -->
 - "normaliser" les données <!-- .element: class="fragment" data-fragment-index="1" -->
-- <!-- .element: class="fragment" data-fragment-index="2" --> 
+- <!-- .element: class="fragment" data-fragment-index="2" -->
   ~~duplication~~ <!-- .element: class="fragment" data-fragment-index="2" -->
 - ne pas structurer son store en fonction de l'UI <!-- .element: class="fragment" data-fragment-index="3" -->
 
-Note: 
-- normaliser => aplatir son schéma. Considérez votre état d'application comme une base de données 
+Note:
+- normaliser => aplatir son schéma. Considérez votre état d'application comme une base de données
   * séparer les articles de blogs, les auteurs et les commentaires dans des "collections" différentes du _state_.
 - exemple: dictionnaire d'objets session ET un objet currentSession => Quid de la MaJ de ladite session ?
 - un changement de structure UI ne devrait pas changer la structure du _state_
