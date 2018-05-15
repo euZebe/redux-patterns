@@ -1,5 +1,9 @@
 const { createStore } = require('redux');
 
+// -------
+// ACTIONS
+// -------
+
 function initGame(players) {
   console.log('=> jeu initialisé');
   return {
@@ -21,6 +25,9 @@ function throwPin(fallenPins = [], player) {
   };
 }
 
+// -------
+// REDUCER
+// -------
 function rootReducer(state = {}, action) {
   switch (action.type) {
 
@@ -96,9 +103,6 @@ function rootReducer(state = {}, action) {
   }
 }
 
-// init store
-const store = createStore(rootReducer);
-
 /**
  * Listener which keeps a cache of the player state, executing itself only on new player state
  * @param name
@@ -135,15 +139,18 @@ function crowd() {
         console.log('😞😞\n');
       }
     } else {
-      console.log('\t\t\t/!\\TOUTE L\'ASSISTANCE AVAIT-ELLE LES YEUX FERMÉS ??');
+      console.log('\t\t\t/!\\ L\'ASSISTANCE N\'A RIEN VU ?!');
     }
     cachedState = nextState;
   }
 }
 
+// init store
+const store = createStore(rootReducer);
+
 // store.subscribe returns a function to unregister the listener
-const unsubscribeAliceListener = store.subscribe(AliceListener);
-const unsubscribeBobListener = store.subscribe(BobListener);
+store.subscribe(AliceListener);
+store.subscribe(BobListener);
 store.subscribe(crowd());
 
 store.dispatch(initGame(['Alice', 'Bob']));
