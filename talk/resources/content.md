@@ -1,6 +1,9 @@
 ﻿# Redux
 ## bonnes et moins bonnes pratiques
 
+Note:
+couper le téléphone
+
 ~~~
 ## objectifs de la présentation
 - introduire Redux
@@ -18,13 +21,13 @@ Note: en se concentrant sur Redux, et non sur le couple React + Redux
 - gérant l'état de l'application
 
 Note:
-- indépendante de toute lib et de tout framework
 - "état": données mises en cache, route active de l'appli, onglet sélectionné, langue courante.....
+- séparation des responsabilités Redux vs UI (pas d'adhérence UI => modèle)
 
 ~~~
 ## 3 principes
 1. _single source of truth_
-1. _state_ en lecture seule
+1. _state_ en lecture seule (pas de mutation)
 1. changements de _state_ par functions pure (_reducers_)
 
 Note:
@@ -34,18 +37,34 @@ Note:
 ~~~
 ## fonction pure / impure
 ```javascript
+// pure
+function withVAT(value) {
+  return value * 1.206;
+}
+
 // impure
 const counter = 2;
 function addToCounter(value) {
   return value + counter; // dépend d'un contexte, counter
 }
 
-// pure
-function withVAT(value) {
-  return value * 1.206;
-}
 ```
 
+~~~
+## Flux Redux
+
+1. action "dispatchée" dans le store <!-- .element class="fragment" -->
+- le store exécute le reducer <!-- .element class="fragment" -->
+- (oldState, action) => newState <!-- .element class="fragment" -->
+- le store notifie les listeners <!-- .element class="fragment" -->
+
+```
+[action] ➡ [STORE: [reducer] ➡ [state] ] ➡ [listeners]
+```
+
+Note:
+- flux unidirectionnel
+- reducer peut être une combinaison de plusieurs reducers
 
 ///
 ## illustration du principe :
@@ -54,7 +73,8 @@ function withVAT(value) {
 ![initial state](resources/initialState.jpg)
 ![new state](resources/newState.jpg)
 
-Note: rappeler les règles brièvement
+Note:
+- règles: points, victoire, élimination
 
 ~~~
 ### state
@@ -76,10 +96,13 @@ Note: rappeler les règles brièvement
  (_3)	(11)   (_6)
           (10)   (_4)
 ```
+
 ~~~
 ### action
 ![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
 ![action](resources/action.jpg)
+
+Note: action = Objet { joueur, quilles tombées }
 
 ~~~
 ### reducer
@@ -119,13 +142,8 @@ les Listeners sont notifiées d'une modification du store (et se rafraichissent 
 ```javascript
 const { createStore } = require('redux');
 
-const action = {
-  type: 'INIT_SCORES_SHEET',
-  players: ['Alice', 'Bob']
-};
-
 function initGame(players) {
-  console.log("=> jeu initialisé");
+  console.log('=> jeu initialisé');
   return {
     type: 'INIT_SCORES_SHEET',
     players, // same as players: players
@@ -134,7 +152,7 @@ function initGame(players) {
 
 function throwPin(fallenPins = [], player) {
   if (fallenPins.length) {
-    console.log(`${player} a fait tomber la/les quille.s ${fallenPins}`);
+    console.log(`${player} a fait tomber la/les quille(s) ${fallenPins}`);
   } else {
     console.log(`${player} n'a fait tomber aucune quille`);
   }
@@ -190,6 +208,8 @@ function rootReducer(state = {}, action) {
       }
 
       // else, several pins falled
+
+      // TODO: toggle this block and the next one to make reducer unpure
       const nextPlayerState = {
         ...previousPlayerState,
         score: previousPlayerState.score + fallenPins.length,
@@ -201,6 +221,18 @@ function rootReducer(state = {}, action) {
         [player]: nextPlayerState
       };
 
+      // FIXME: unpure reducer: state mutated => audience and referee won't see the action
+      // state[player].score += fallenPins.length;
+      // state[player].consecutiveFailures = 0;
+      // state.fallenPins = fallenPins.length;
+      // return state;
+
+      // FIXME: unpure reducer: nested state mutated => player listener won't see the action
+      // const nextState = { ...state, fallenPins: fallenPins.length };
+      // nextState[player].consecutiveFailures = 0;
+      // nextState[player].score += fallenPins.length;
+      // return nextState;
+
     default:
       return state;
   }
@@ -209,32 +241,52 @@ function rootReducer(state = {}, action) {
 // init store
 const store = createStore(rootReducer);
 
-// define listeners
+/**
+ * Listener which keeps a cache of the player state, executing itself only on new player state
+ * @param name
+ * @returns {Function}
+ * @constructor
+ */
 function PlayerListener(name) {
+  let cachedState = store.getState()[name];
   return () => {
     const playerState = store.getState()[name];
-    if (playerState) {
+    if (playerState !== cachedState) {
       console.log(`${name}: ${playerState.score}, ${playerState.consecutiveFailures} échecs en cours`);
     }
+    cachedState = playerState;
   }
 }
 
 const AliceListener = PlayerListener('Alice');
 const BobListener = PlayerListener('Bob');
 
+/**
+ * function which keeps a cache of the currentState, updated at the end of the
+ * @returns {Function}
+ */
 function crowd() {
-  const fallenPinsOnLastThrow = store.getState().fallenPins;
-  if (fallenPinsOnLastThrow) {
-    console.log('👏👏 audience applauses 👏👏\n');
-  } else {
-    console.log('😞😞\n');
+  let cachedState = store.getState();
+  return () => {
+    const nextState = store.getState();
+    if (nextState !== cachedState) {
+      const fallenPinsOnLastThrow = nextState.fallenPins;
+      if (fallenPinsOnLastThrow) {
+        console.log('👏👏 audience applauses 👏👏\n');
+      } else {
+        console.log('😞😞\n');
+      }
+    } else {
+      console.log('\t\t\t/!\\TOUTE L\'ASSISTANCE AVAIT-ELLE LES YEUX FERMÉS ??');
+    }
+    cachedState = nextState;
   }
 }
 
 // store.subscribe returns a function to unregister the listener
 const unsubscribeAliceListener = store.subscribe(AliceListener);
 const unsubscribeBobListener = store.subscribe(BobListener);
-store.subscribe(crowd);
+store.subscribe(crowd());
 
 store.dispatch(initGame(['Alice', 'Bob']));
 store.dispatch(throwPin([12, 4, 6, 2], 'Alice'));
@@ -488,7 +540,7 @@ Note:
 ### remerciements
 Jean-Baptiste, Alexandra, Julien,
 
-Zélia, Silvère, mab, Thibault
+Zélia, Silvère, Mab, Thibault
 
 ~~~
 ### ressources
