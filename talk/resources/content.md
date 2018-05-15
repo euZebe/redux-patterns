@@ -305,11 +305,9 @@ Note: le but n'est pas de dire que que redux est mieux ou moins bien que telle o
 ### immutabilité du _state_
 📄 <!-- .element: class="slide-icon" -->
 
-~~modifier le _state_~~
-
-Pour prévenir les mutations, <!-- .element: class="fragment" data-fragment-index="1" -->
-
-rigueur / librairie d'immutabilité <!-- .element: class="fragment" data-fragment-index="1" -->
+Pour prévenir les mutations: <!-- .element: class="fragment" data-fragment-index="1" -->
+- rigueur, ou <!-- .element: class="fragment" data-fragment-index="1" -->
+- librairie d'immutabilité (immutable-js / ...)<!-- .element: class="fragment" data-fragment-index="1" -->
 
 Note:
 - demo molkky en modifiant le reducer
@@ -367,10 +365,67 @@ state = {
 };
 ```
 
-Note:
-- normaliser => aplatir son schéma. Considérez votre état d'application comme une base de données
-  * séparer les articles de blogs, les auteurs et les commentaires dans des "collections" différentes du _state_.
+~~~
+### structuration du _state_
+📄 <!-- .element: class="slide-icon" -->
 
+normaliser les données
+```javascript
+// NORMALIZED
+state = {
+  blogPosts: [
+    {
+      id : "post1",
+      authorID : 'user1'
+      body : "......",
+      commentsID : ["comment1", "comment2"],
+    },
+    {
+      id : "post2",
+      author : 'user2',
+      body : "......",
+      commentsID : ["comment3", "comment4", "comment5"],
+    }
+  ],
+  comments: [
+    {
+      id : "comment1",
+      authorID : 'user2',
+      comment : ".....",
+    },
+    {
+      id : "comment2",
+      authorID : 'user3',
+      comment : ".....",
+    },
+    {
+      id : "comment3",
+      authorID : 'user3',
+      comment : ".....",
+    },
+    {
+      id : "comment4",
+      authorID : 'user1',
+      comment : ".....",
+    },
+    {
+      id : "comment5",
+      authorID : 'user3',
+      comment : ".....",
+    }
+  ],
+  authors: [
+    {username : "user1", name : "User 1"},
+    {username : "user2", name : "User 2"},
+    {username : "user3", name : "User 3"},
+  ],
+};
+```
+considérez le state comme une base de données <!-- .element class="fragment" -->
+
+Note:
+- états imbriqués créent de la complexité
+- problèmes de performance
 
 ~~~
 ### structuration du _state_ (II)
@@ -396,38 +451,7 @@ Note:
 ### structuration du _state_ (III)
 📄 <!-- .element: class="slide-icon" -->
 
-~~états imbriqués~~
-```javascript
-reducer(state = {}, action) {
-  switch(action.type){
-    const { commentID, comment } = action;
-    case 'MODIFY_COMMENT':
-      return {
-        ...state, // put references of all articles and authors
-        comments: { // change reference of comments attribute
-          ...state.comments,
-          commentID: {
-            id: commentID,
-            comment,
-          },
-        },
-      };
-  }
-}
-```
-⚠ rafraîchit trop de composants <!-- .element: class="fragment" -->
-
-Note:
-- si modif commentaire, ref vers tous les commentaires modifiée => tous les commentaires rafraîchis
-TODO: check this
-
-~~~
-### structuration du _state_ (IV)
-📄 <!-- .element: class="slide-icon" -->
-
 dictionnaire (hashmap&lt;id, value>) plutôt que tableau
-
-exemple: liste de pays triée par population <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ```javascript
 const state = {
@@ -437,35 +461,52 @@ const state = {
     IN: {id: 'IN', name: 'India', population: 1347781156},
     US: {id: 'US', name: 'United States', population: 327163096},
   },
-  countriesByPopulationDesc: ['CN', 'IN', 'US', 'ID'],
 };
-``` 
+```
+Récupération d'un élément par ID plus performant 👍 <!-- .element: class="fragment" data-fragment-index="1" -->
+```javascript
+state.countries[id] // countries is object
+// vs
+state.countries.find(c => c.id === id) // countries is array
+```
 <!-- .element: class="fragment" data-fragment-index="1" -->
 Note: 
-- permet l'accès rapide au détail d'un pays (sans avoir à faire de countries.find() de + en + coûteux avec le nb croissant d'éléments), et un accès rapide aux tris. 
-- /!\ si un pays est ajouté, il faut penser à MaJ le dictionnaire ET le.s tableau.x ➡ mieux: selector
+- countries.find() de + en + coûteux avec le nb croissant d'éléments), et un accès rapide aux tris.
+
+~~~
+### et ma liste triée ?!
+```javascript
+const state = {
+  countries: { ... },
+  countriesByPopulationDesc: ['CN', 'IN', 'US', 'ID']
+};
+```
+<!-- .element class="fragment" -->
+ajout d'un pays => penser à recalculer l'index 👎 <!-- .element class="fragment" -->
 
 ~~~
 ### Selector 
 🔎<!-- .element: class="slide-icon" -->
 
-- permet de sélectionner quelques données d'un state
-- API d'accès au state de votre application
+- sélectionner une partie du state
+- calculer des données dérivées du state
 
 ```javascript
 const getCountries = state => state.countries;
 
 function getCountriesByPopulationDesc(state) {
-  return getCountries(state).sort(
-    (a, b) => a.population - b.population
+  const countriesArray = Object.values(getCountries(state));
+  return countriesArray.sort(
+    (a, b) => b.population - a.population
   );
 }
 ```
+- API d'accès au state de votre application <!-- .element: class="fragment" -->
 - permet de s'affranchir des index 👍 <!-- .element: class="fragment" -->
 - recalcule l'index à chaque fois qu'on y accède 👎 <!-- .element: class="fragment" -->
 
 Note:
-- selectors PARTOUT => forme de state plus aisément modifiable. Ex: pour renommer _countries_ par _mostPopulatedCountries_, il n'y a qu'à le modifier dans le reducer et dans l'unique selector pour cet attribut ; tous les sélecteurs dérivés (getCountriesByPopulationDesc) et composants utilisant le selector récupéreront alors la donnée au bon nouvel endroit. 
+- selectors PARTOUT où accès au state. Ex: pour renommer _countries_ par _mostPopulatedCountries_
 - la façon de structurer le state devient un détail d'implémentation.
 
 ~~~
@@ -473,34 +514,49 @@ Note:
 🔎<!-- .element: class="slide-icon" -->
 
 
-sélecteurs mémorisés, et réévalués seulement au changement d'un paramètre d'entrée
+- sélecteurs mémorisés (cache)
+- réévalués au changement d'un paramètre d'entrée
+
 ```javascript
 import { createSelector } from 'reselect';
 
 const getCountries = state => state.countries;
 
+// donnée dérivée du state => reselect
 const getCountriesByPopulationDesc = createSelector(
   getCountries,
   countries => countries.sort(
-    (a, b) => a.population - b.population
+    (a, b) => b.population - a.population
   );
 }
 ```
+<!-- .element class="fragment" -->
 Note:
-- Pour un composant React par exemple, éviter de calculer des données (sort, filter, map, reduce...) dans le render d'un composant ou dans le mapStateToProps du Container ; préférez faire la préparation des données dans un selector, appelé dans le Container (rappeler qu'un Container souscrit aux modifications du store, et est donc réexécuté à chaque modification de celui-ci... impact sur les perfs)
+- composition de selectors
+- dérivation de données (sort, filter, map, reduce...)
+    - ~~composant~~
+    - ~~mapStateToProps du Container~~
+- préparation des données dans selector, appelé dans le Container
+- Rappel: Container souscrit aux modifications du store
+=> réexécuté à chaque action dispatchée... impact sur les perfs
 
 ~~~
 ### ducks
 📂<!-- .element: class="slide-icon" -->
 
 préconisation de structuration des éléments Redux
-- regrouper au sein d'un fichier par périmètre fonctionnel _reducer_, _types_, et _actionCreators_.
-- Export nommé pour les _actionCreators_ et les _selectors_, export par défaut du _reducer_
+- 1 fichier par domaine fonctionnel:
+
+    { _reducer_, _types_, _actionCreators_ }
+- _actionCreators_ / _actions_: export nommé
+- _selectors_: export nommé
+- _reducer_: export default
 
 __Rappel:__ <!-- .element: class="fragment" data-fragment-index="1" -->
-##### mapping action - reducer: 1-n <!-- .element: class="fragment" data-fragment-index="1" -->
 
-Note: Une même action peut faire réagir plusieurs reducers. Exemple:
+mapping action - reducer: 1-n <!-- .element: class="fragment" data-fragment-index="1" -->
+
+Note: Exemple:
 `dispatch({ type: COMMENT_SUBMIT ... });` peut être traité par
 - commentReducer: qui va ajouter/modifier le commentaire
 - uiReducer: qui va fermer le formulaire
@@ -525,6 +581,9 @@ Note:
 ###### vs
 ### local (component) state
 📄 <!-- .element: class="slide-icon" -->
+
+cf. "You may not need Redux"
+
 Note: Débat non tranché
 ##### tout mettre dans le store
 - meilleure visibilité de l'état global de l'appli,
@@ -551,7 +610,7 @@ function validateAndCloseForm(formValues) {
     const previousState = getState();
 
     dispatch({ type: 'VALIDATE_FORM', formValues });
-    //dispatch is synchronous => getState() gets the new state
+    //dispatch is synchronous => getState() === new state
     const intermediateState = getState();
 
     dispatch({ type: 'CLOSE_FORM', id: formValues.id });
@@ -561,11 +620,39 @@ function validateAndCloseForm(formValues) {
   }
 }
 ```
+
+~~~
+### another example
+![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
+```javascript
+function fetchArticles() {
+  return (dispatch) => {
+    dispatch(startFetchingArticles());
+
+    fetchData()
+      .then(data => {
+        dispatch(fetchArticlesSuccess(data));
+      })
+      .fail(err => {
+        dispatch(fetchArticlesError(err.message));
+      });
+  }
+}
+```
+
+Note:
+- si plusieurs promises chaînées, perte de lisibilité et de maintenabilité
+- => redux-saga
+
+
 ~~~
 ### redux-saga
 ![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
 - facilite l'orchestration d'actions complexes et/ou asynchrones
 - facile à tester
+
+// TODO: https://engineering.universe.com/what-is-redux-saga-c1252fc2f4d1
+// TODO: https://medium.com/javascript-and-opinions/redux-side-effects-and-you-66f2e0842fc3
 
 ~~~
 ### redux devtools
@@ -580,7 +667,7 @@ Note:
 
 ~~~
 ### autres librairies notables
-- normalizr (pour convertir une réponse d'API par exemple, en de la donnée normalisée ?)
+- normalizr
 - redux-undo
 
 
