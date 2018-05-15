@@ -103,50 +103,52 @@ function rootReducer(state = {}, action) {
   }
 }
 
+// init store
+const store = createStore(rootReducer);
+
+
 /**
  * Listener which keeps a cache of the player state, executing itself only on new player state
  * @param name
  * @returns {Function}
  * @constructor
  */
-function PlayerListener(name) {
+const playerListener = (name) => {
   let cachedState = store.getState()[name];
   return () => {
     const playerState = store.getState()[name];
     if (playerState !== cachedState) {
-      console.log(`${name}: ${playerState.score}, ${playerState.consecutiveFailures} échecs en cours`);
+      console.log(`${name}: ${playerState.score}, échecs en cours: ${playerState.consecutiveFailures}`);
     }
     cachedState = playerState;
   }
-}
+};
 
-const AliceListener = PlayerListener('Alice');
-const BobListener = PlayerListener('Bob');
+const AliceListener = playerListener('Alice');
+const BobListener = playerListener('Bob');
 
 /**
  * function which keeps a cache of the currentState, updated at the end of the
  * @returns {Function}
  */
-function crowd() {
+const crowd = () => {
   let cachedState = store.getState();
   return () => {
     const nextState = store.getState();
     if (nextState !== cachedState) {
       const fallenPinsOnLastThrow = nextState.fallenPins;
       if (fallenPinsOnLastThrow) {
-        console.log('👏👏 audience applauses 👏👏\n');
+        console.log('Spectateurs: 👏👏👏👏\n');
       } else {
-        console.log('😞😞\n');
+        console.log('Spectateurs: 😞\n');
       }
     } else {
       console.log('\t\t\t/!\\ L\'ASSISTANCE N\'A RIEN VU ?!');
     }
     cachedState = nextState;
   }
-}
+};
 
-// init store
-const store = createStore(rootReducer);
 
 // store.subscribe returns a function to unregister the listener
 store.subscribe(AliceListener);
