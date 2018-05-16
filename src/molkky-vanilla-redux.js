@@ -1,9 +1,13 @@
 const { createStore } = require('redux');
 
-// -------
-// ACTIONS
-// -------
+/*
+  ACTIONS (and rather ACTION CREATORS)
+ */
 
+/**
+ * @param players: string[]
+ * @returns {{ type: string, players: string[] }}
+ */
 function initGame(players) {
   console.log('=> jeu initialisé');
   return {
@@ -12,6 +16,12 @@ function initGame(players) {
   };
 }
 
+/**
+ *
+ * @param fallenPins: number[]
+ * @param player: string
+ * @returns {{ type: string, player: string, fallenPins: number[] }}
+ */
 function throwPin(fallenPins = [], player) {
   if (fallenPins.length) {
     console.log(`${player} a fait tomber la/les quille(s) ${fallenPins}`);
@@ -25,9 +35,23 @@ function throwPin(fallenPins = [], player) {
   };
 }
 
-// -------
-// REDUCER
-// -------
+
+/*
+  REDUCER
+ */
+
+/**
+ * @param state shape = {
+ *    fallenPins: number,
+ *    playerX: {      // iterated over players
+ *      name: string,
+ *      score: number,
+ *      consecutiveFailures: number,
+ *    }
+ * }
+ * @param action
+ * @returns a new state, with the shape described above
+ */
 function rootReducer(state = {}, action) {
   switch (action.type) {
 
@@ -45,7 +69,7 @@ function rootReducer(state = {}, action) {
       const { player, fallenPins } = action;
       const previousPlayerState = state[player];
 
-      // no pin falled
+      // no pin felt
       if (!fallenPins.length) {
         const nextPlayerState = {
           ...previousPlayerState,
@@ -58,7 +82,7 @@ function rootReducer(state = {}, action) {
         };
       }
 
-      // one pin falled
+      // one pin felt
       if (fallenPins.length === 1) {
         const nextPlayerState = {
           ...previousPlayerState,
@@ -72,7 +96,7 @@ function rootReducer(state = {}, action) {
         };
       }
 
-      // else, several pins falled
+      // else, several pins felt
 
       // TODO: toggle this block and the next one to make reducer unpure
       const nextPlayerState = {
