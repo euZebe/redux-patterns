@@ -22,13 +22,13 @@ Note: en se concentrant sur Redux, et non sur le couple React + Redux
 
 Note:
 - "état": données mises en cache, route active de l'appli, onglet sélectionné, langue courante.....
-- séparation des responsabilités Redux vs UI (pas d'adhérence UI => modèle)
+- séparation des responsabilités Redux vs UI
 
 ~~~
 ## 3 principes
 1. _single source of truth_
 1. _state_ en lecture seule (pas de mutation)
-1. changements de _state_ par functions pure (_reducers_)
+1. changements de _state_ par fonctions pures (_reducers_)
 
 Note:
 1. L'état de l'application est défini par un seul objet, géré par un _store_ unique.
@@ -43,9 +43,9 @@ function withVAT(value) {
 }
 
 // impure
-const counter = 2;
+let counter = 2;
 function addToCounter(value) {
-  return value + counter; // dépend d'un contexte, counter
+  return counter += value; // dépend d'un contexte, counter
 }
 
 ```
@@ -547,9 +547,10 @@ Note:
 préconisation de structuration des éléments Redux
 - 1 fichier par domaine fonctionnel:
 
-    { _reducer_, _types_, _actionCreators_ }
+    { _reducer_, _types_, _actionCreators_, _selectors_ }
 - _actionCreators_ / _actions_: export nommé
 - _selectors_: export nommé
+- _types_: export nommé
 - _reducer_: export default
 
 __Rappel:__ <!-- .element: class="fragment" data-fragment-index="1" -->
@@ -633,7 +634,7 @@ function fetchArticles() {
       .then(data => {
         dispatch(fetchArticlesSuccess(data));
       })
-      .fail(err => {
+      .catch(err => {
         dispatch(fetchArticlesError(err.message));
       });
   }
