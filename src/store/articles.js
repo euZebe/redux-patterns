@@ -29,7 +29,7 @@ export default function articlesReducer(state = {}, action) {
       const id = generate();
       const { title, body, creationDate } = action.payload;
       // FIXME: uncomment to show deepFreeze action
-      // state[id].truc = 'machin';
+      // state.truc = 'machin';
       return {
         ...state,
         [id]: {
