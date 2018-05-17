@@ -110,7 +110,6 @@ fonction pure
 ```
 reducer: (previousScore, action) => nextScore
 ```
-Note: immutable !
 
 ~~~
 ### listeners
@@ -123,10 +122,14 @@ Alice + Bob + supporters
 ```javascript
 const { createStore } = require('redux');
 
-// -------
-// ACTIONS
-// -------
+/*
+  ACTIONS (and rather ACTION CREATORS)
+ */
 
+/**
+ * @param players: string[]
+ * @returns {{ type: string, players: string[] }}
+ */
 function initGame(players) {
   console.log('=> jeu initialisé');
   return {
@@ -135,6 +138,12 @@ function initGame(players) {
   };
 }
 
+/**
+ *
+ * @param fallenPins: number[]
+ * @param player: string
+ * @returns {{ type: string, player: string, fallenPins: number[] }}
+ */
 function throwPin(fallenPins = [], player) {
   if (fallenPins.length) {
     console.log(`${player} a fait tomber la/les quille(s) ${fallenPins}`);
@@ -148,10 +157,24 @@ function throwPin(fallenPins = [], player) {
   };
 }
 
-// -------
-// REDUCER
-// -------
-function rootReducer(state = {}, action) {
+
+/*
+  REDUCER
+ */
+
+/**
+ * @param previousState shape = {
+ *    fallenPins: number,
+ *    playerX: {      // iterated over players
+ *      name: string,
+ *      score: number,
+ *      consecutiveFailures: number,
+ *    }
+ * }
+ * @param action
+ * @returns a new state, with the shape described above
+ */
+function rootReducer(previousState = {}, action) {
   switch (action.type) {
 
     case 'INIT_SCORES_SHEET':
@@ -166,22 +189,22 @@ function rootReducer(state = {}, action) {
 
     case 'THROW':
       const { player, fallenPins } = action;
-      const previousPlayerState = state[player];
+      const previousPlayerState = previousState[player];
 
-      // no pin falled
+      // no pin fell
       if (!fallenPins.length) {
         const nextPlayerState = {
           ...previousPlayerState,
           consecutiveFailures: previousPlayerState.consecutiveFailures + 1, // pas de ++, on ne modifie pas previousPlayerState
         };
         return {
-          ...state,
+          ...previousState,
           fallenPins: fallenPins.length,
           [player]: nextPlayerState,
         };
       }
 
-      // one pin falled
+      // one pin fell
       if (fallenPins.length === 1) {
         const nextPlayerState = {
           ...previousPlayerState,
@@ -189,13 +212,13 @@ function rootReducer(state = {}, action) {
           consecutiveFailures: 0,
         };
         return {
-          ...state,
+          ...previousState,
           fallenPins: fallenPins.length,
           [player]: nextPlayerState,
         };
       }
 
-      // else, several pins falled
+      // else, several pins fell
 
       // TODO: toggle this block and the next one to make reducer unpure
       const nextPlayerState = {
@@ -204,7 +227,7 @@ function rootReducer(state = {}, action) {
         consecutiveFailures: 0,
       };
       return {
-        ...state,
+        ...previousState,
         fallenPins: fallenPins.length,
         [player]: nextPlayerState
       };
@@ -216,15 +239,20 @@ function rootReducer(state = {}, action) {
       // return state;
 
       // FIXME: unpure reducer: nested state mutated => player listener won't see the action
+      // FIXME: !! BobListener listens modifications on Bob's substate
       // const nextState = { ...state, fallenPins: fallenPins.length };
       // nextState[player].consecutiveFailures = 0;
       // nextState[player].score += fallenPins.length;
       // return nextState;
 
     default:
-      return state;
+      return previousState;
   }
 }
+
+// init store
+const store = createStore(rootReducer);
+
 
 /**
  * Listener which keeps a cache of the player state, executing itself only on new player state
@@ -232,44 +260,43 @@ function rootReducer(state = {}, action) {
  * @returns {Function}
  * @constructor
  */
-function PlayerListener(name) {
+const playerListener = (name) => {
   let cachedState = store.getState()[name];
   return () => {
     const playerState = store.getState()[name];
     if (playerState !== cachedState) {
-      console.log(`${name}: ${playerState.score}, ${playerState.consecutiveFailures} échecs en cours`);
+      console.log(`${name}: ${playerState.score}, échecs en cours: ${playerState.consecutiveFailures}`);
     }
     cachedState = playerState;
   }
-}
+};
 
-const AliceListener = PlayerListener('Alice');
-const BobListener = PlayerListener('Bob');
+// Listen to the sub-state corresponding to its player
+const AliceListener = playerListener('Alice');
+const BobListener = playerListener('Bob');
 
 /**
  * function which keeps a cache of the currentState, updated at the end of the
  * @returns {Function}
  */
-function crowd() {
+const crowd = () => {
   let cachedState = store.getState();
   return () => {
     const nextState = store.getState();
     if (nextState !== cachedState) {
       const fallenPinsOnLastThrow = nextState.fallenPins;
       if (fallenPinsOnLastThrow) {
-        console.log('👏👏 audience applauses 👏👏\n');
+        console.log('Spectateurs: 👏👏👏👏\n');
       } else {
-        console.log('😞😞\n');
+        console.log('Spectateurs: 😞\n');
       }
     } else {
       console.log('\t\t\t/!\\ L\'ASSISTANCE N\'A RIEN VU ?!');
     }
     cachedState = nextState;
   }
-}
+};
 
-// init store
-const store = createStore(rootReducer);
 
 // store.subscribe returns a function to unregister the listener
 store.subscribe(AliceListener);
@@ -302,14 +329,23 @@ Note: le but n'est pas de dire que que redux est mieux ou moins bien que telle o
 ## Bonnes pratiques
 
 ~~~
-### immutabilité du _state_
+##### le _store_ qui murmurait
+##### à l'oreille des _listeners_
 📄 <!-- .element: class="slide-icon" -->
 
-Pour prévenir les mutations: <!-- .element: class="fragment" data-fragment-index="1" -->
-- rigueur, ou <!-- .element: class="fragment" data-fragment-index="1" -->
-- librairie d'immutabilité (immutable-js / ...)<!-- .element: class="fragment" data-fragment-index="1" -->
+- listeners notifiés à chaque action dispatchée
+- comparaison par valeurs (deepEqual) coûteux... <!-- .element: class="fragment" data-fragment-index="1" -->
+- ➡ listeners basés sur la comparaison par référence <!-- .element: class="fragment" data-fragment-index="2" -->
+- modification d'attribut sans impact sur référence <!-- .element: class="fragment" data-fragment-index="3" -->
+
+⬇ <!-- .element: class="fragment" data-fragment-index="4" -->
+### immutabilité du state <!-- .element: class="fragment" data-fragment-index="4" -->
+
+- rigueur, ou <!-- .element: class="fragment" data-fragment-index="8" -->
+- librairie d'immutabilité (immutableJS par ex.)<!-- .element: class="fragment" data-fragment-index="8" -->
 
 Note:
+- coûteux: (x N listeners x M actions dispatchées)
 - demo molkky en modifiant le reducer
 - immutable-js
 
@@ -488,8 +524,8 @@ ajout d'un pays => penser à recalculer l'index 👎 <!-- .element class="fragme
 ### Selector 
 🔎<!-- .element: class="slide-icon" -->
 
-- sélectionner une partie du state
-- calculer des données dérivées du state
+- GETTERS sur le state
+- fonctions de calcul des données dérivées du _state_
 
 ```javascript
 const getCountries = state => state.countries;
@@ -501,11 +537,12 @@ function getCountriesByPopulationDesc(state) {
   );
 }
 ```
-- API d'accès au state de votre application <!-- .element: class="fragment" -->
+- API d'accès au _state_ de votre application <!-- .element: class="fragment" -->
 - permet de s'affranchir des index 👍 <!-- .element: class="fragment" -->
 - recalcule l'index à chaque fois qu'on y accède 👎 <!-- .element: class="fragment" -->
 
 Note:
+- Selector = GETTER vs Reducer crée nouveau state
 - selectors PARTOUT où accès au state. Ex: pour renommer _countries_ par _mostPopulatedCountries_
 - la façon de structurer le state devient un détail d'implémentation.
 
@@ -525,7 +562,7 @@ const getCountries = state => state.countries;
 // donnée dérivée du state => reselect
 const getCountriesByPopulationDesc = createSelector(
   getCountries,
-  countries => countries.sort(
+  countries => Object.values(countries).sort(
     (a, b) => b.population - a.population
   );
 }
@@ -572,7 +609,8 @@ Note: Exemple:
 - ➡ utiliser deepFreeze sur le state dans chaque test <!-- .element: class="fragment" -->
 
 Note:
-### deepFreeze:
+
+#### deepFreeze:
 - garantit l'immutabilité du state.
 - DEMO articles.spec.js et articles.js
 - PAS EN PROD (ou au moyen d'une lib dédiée à l'immutabilité => optimisée)
@@ -647,7 +685,7 @@ Note:
 
 
 ~~~
-### redux-saga
+### redux-saga (lib)
 ![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
 - facilite l'orchestration d'actions complexes et/ou asynchrones
 - facile à tester
@@ -685,9 +723,9 @@ Note:
 
 ~~~
 ### remerciements
-Jean-Baptiste, Alexandra, Julien,
+Jean-Baptiste, Alexandra, Julien, Zélia,
 
-Zélia, Silvère, Mab, Thibault
+Silvère, Mab, Thibault, Dorothée, Yann
 
 ~~~
 ### ressources
