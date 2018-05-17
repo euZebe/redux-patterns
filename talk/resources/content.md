@@ -1,13 +1,15 @@
 ﻿# Redux
-## bonnes et moins bonnes pratiques
+## bonnes pratiques
 
 Note:
 couper le téléphone
 
 ~~~
-## objectifs de la présentation
-- introduire Redux
-- mettre en lumière certaines pratiques
+## Programme
+📅 <!-- .element class="slide-icon" -->
+
+1. introduction à Redux
+- mise en lumière de certaines pratiques
 
 Note: en se concentrant sur Redux, et non sur le couple React + Redux
 
@@ -27,12 +29,12 @@ Note:
 ~~~
 ## 3 principes
 1. _single source of truth_
-1. _state_ en lecture seule (pas de mutation)
+1. _state_ en lecture seule
 1. changements de _state_ par fonctions pures (_reducers_)
 
 Note:
 1. L'état de l'application est défini par un seul objet, géré par un _store_ unique.
-2. ne mutez pas une partie du state là où vous l'accédez ; la seule façon de changer le state est en émettant une action, qui donne lieu à un nouvel état.
+2. PAS DE MUTATION
 
 ~~~
 ## fonction pure / impure
@@ -457,7 +459,7 @@ state = {
   ],
 };
 ```
-considérez le state comme une base de données <!-- .element class="fragment" -->
+Considérez le state comme une base de données <!-- .element class="fragment" -->
 
 Note:
 - états imbriqués créent de la complexité
@@ -499,7 +501,7 @@ const state = {
   },
 };
 ```
-Récupération d'un élément par ID plus performant 👍 <!-- .element: class="fragment" data-fragment-index="1" -->
+Récupération d'élément par ID plus performant 👍 <!-- .element: class="fragment" data-fragment-index="1" -->
 ```javascript
 state.countries[id] // countries is object
 // vs
@@ -517,8 +519,11 @@ const state = {
   countriesByPopulationDesc: ['CN', 'IN', 'US', 'ID']
 };
 ```
-<!-- .element class="fragment" -->
-ajout d'un pays => penser à recalculer l'index 👎 <!-- .element class="fragment" -->
+<!-- .element class="fragment" data-fragment-index="0" -->
+
+ajout / suppression dans dictionnaire<!-- .element class="fragment" data-fragment-index="1" -->
+
+=> recalcul de l'index 👎 <!-- .element class="fragment" data-fragment-index="1" -->
 
 ~~~
 ### Selector 
@@ -537,9 +542,9 @@ function getCountriesByPopulationDesc(state) {
   );
 }
 ```
-- API d'accès au _state_ de votre application <!-- .element: class="fragment" -->
-- permet de s'affranchir des index 👍 <!-- .element: class="fragment" -->
-- recalcule l'index à chaque fois qu'on y accède 👎 <!-- .element: class="fragment" -->
+- selectors = API de lecture du state <!-- .element: class="fragment" -->
+- plus besoin des index 👍 <!-- .element: class="fragment" -->
+- recalcul systématique des données dérivées 👎 <!-- .element: class="fragment" -->
 
 Note:
 - Selector = GETTER vs Reducer crée nouveau state
@@ -585,10 +590,7 @@ préconisation de structuration des éléments Redux
 - 1 fichier par domaine fonctionnel:
 
     { _reducer_, _types_, _actionCreators_, _selectors_ }
-- _actionCreators_ / _actions_: export nommé
-- _selectors_: export nommé
-- _types_: export nommé
-- _reducer_: export default
+- reducer exporté par défaut
 
 __Rappel:__ <!-- .element: class="fragment" data-fragment-index="1" -->
 
@@ -605,8 +607,8 @@ Note: Exemple:
 ✓❌ <!-- .element: class="slide-icon" -->
 
 - tester les reducers est simple (fonction pure) <!-- .element: class="fragment" -->
-- possibilité de tester par duck <!-- .element: class="fragment" -->
-- ➡ utiliser deepFreeze sur le state dans chaque test <!-- .element: class="fragment" -->
+- test par duck <!-- .element: class="fragment" -->
+- ➡ deepFreeze dans chaque test <!-- .element: class="fragment" -->
 
 Note:
 
@@ -635,7 +637,10 @@ Note: Débat non tranché
 ### redux-thunk (lib)
 ![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
 - _thunk_: action de type 'function'
-- accès au state dans le thunk <!-- .element: class="fragment" -->
+```javascript
+(dispatch, getState) => {}
+```
+- accès au state <!-- .element: class="fragment" -->
 - multiples dispatch possibles <!-- .element: class="fragment" -->
 - appels asynchrones possibles (Promise.then(dispatch).catch(dispatch)) <!-- .element: class="fragment" -->
 
@@ -687,9 +692,22 @@ Note:
 ~~~
 ### redux-saga (lib)
 ![icon](resources/throw.png)<!-- .element: class="slide-icon" -->
-- facilite l'orchestration d'actions complexes et/ou asynchrones
-- facile à tester
+- orchestration d'actions complexes et/ou asynchrones
+- fonctions pures => facile à tester
+- syntaxe es6
+```javascript
+function* fetchUser(action) {
+   const { userId } = action.payload;
+   try {
+      const user = yield call(Api.fetchUser, userId);
+      yield put({ type: "USER_FETCH_SUCCEEDED", user });
+   } catch ({ message }) {
+      yield put({ type: "USER_FETCH_FAILED", message });
+   }
+}
+```
 
+Note:
 // TODO: https://engineering.universe.com/what-is-redux-saga-c1252fc2f4d1
 // TODO: https://medium.com/javascript-and-opinions/redux-side-effects-and-you-66f2e0842fc3
 
