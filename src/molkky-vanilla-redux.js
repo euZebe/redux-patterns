@@ -41,7 +41,7 @@ function throwPin(fallenPins = [], player) {
  */
 
 /**
- * @param state shape = {
+ * @param previousState shape = {
  *    fallenPins: number,
  *    playerX: {      // iterated over players
  *      name: string,
@@ -52,7 +52,7 @@ function throwPin(fallenPins = [], player) {
  * @param action
  * @returns a new state, with the shape described above
  */
-function rootReducer(state = {}, action) {
+function rootReducer(previousState = {}, action) {
   switch (action.type) {
 
     case 'INIT_SCORES_SHEET':
@@ -67,22 +67,22 @@ function rootReducer(state = {}, action) {
 
     case 'THROW':
       const { player, fallenPins } = action;
-      const previousPlayerState = state[player];
+      const previousPlayerState = previousState[player];
 
-      // no pin felt
+      // no pin fell
       if (!fallenPins.length) {
         const nextPlayerState = {
           ...previousPlayerState,
           consecutiveFailures: previousPlayerState.consecutiveFailures + 1, // pas de ++, on ne modifie pas previousPlayerState
         };
         return {
-          ...state,
+          ...previousState,
           fallenPins: fallenPins.length,
           [player]: nextPlayerState,
         };
       }
 
-      // one pin felt
+      // one pin fell
       if (fallenPins.length === 1) {
         const nextPlayerState = {
           ...previousPlayerState,
@@ -90,13 +90,13 @@ function rootReducer(state = {}, action) {
           consecutiveFailures: 0,
         };
         return {
-          ...state,
+          ...previousState,
           fallenPins: fallenPins.length,
           [player]: nextPlayerState,
         };
       }
 
-      // else, several pins felt
+      // else, several pins fell
 
       // TODO: toggle this block and the next one to make reducer unpure
       const nextPlayerState = {
@@ -105,7 +105,7 @@ function rootReducer(state = {}, action) {
         consecutiveFailures: 0,
       };
       return {
-        ...state,
+        ...previousState,
         fallenPins: fallenPins.length,
         [player]: nextPlayerState
       };
@@ -117,13 +117,14 @@ function rootReducer(state = {}, action) {
       // return state;
 
       // FIXME: unpure reducer: nested state mutated => player listener won't see the action
+      // FIXME: !! BobListener listens modifications on Bob's substate
       // const nextState = { ...state, fallenPins: fallenPins.length };
       // nextState[player].consecutiveFailures = 0;
       // nextState[player].score += fallenPins.length;
       // return nextState;
 
     default:
-      return state;
+      return previousState;
   }
 }
 
@@ -148,6 +149,7 @@ const playerListener = (name) => {
   }
 };
 
+// Listen to the sub-state corresponding to its player
 const AliceListener = playerListener('Alice');
 const BobListener = playerListener('Bob');
 
