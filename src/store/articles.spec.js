@@ -1,11 +1,11 @@
 import { createStore } from 'redux';
 import deepFreeze from 'deep-freeze';
 import { createArticle, getArticlesSortedByCreationDate, getLastModification } from './articles';
-import reducers from './reducers';
+import reducer from './reducers';
 
 describe('articles duck', () => {
   test('should update last modification when an article is added', () => {
-    const store = createStore(reducers);
+    const store = createStore(reducer);
     const previousState = deepFreeze(store.getState());
     expect(getLastModification(previousState)).toBeNull();
     expect(getArticlesSortedByCreationDate(previousState)).toHaveLength(0);

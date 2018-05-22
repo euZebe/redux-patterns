@@ -21,3 +21,7 @@ section.only-image.present > p > img {
     border: unset !important;
     background-color: transparent !important;
 }
+
+.align-right {
+    text-align: right;
+}

@@ -1,6 +1,9 @@
 ﻿# Redux
 ## bonnes pratiques
+___
+Jean Martineau-Figuette <!-- .element class="align-right" -->
 
+22 mai 2018 <!-- .element class="align-right" -->
 Note:
 couper le téléphone
 

@@ -111,14 +111,14 @@ function rootReducer(previousState = {}, action) {
       };
 
       // FIXME: unpure reducer: state mutated => audience and referee won't see the action
-      // state[player].score += fallenPins.length;
-      // state[player].consecutiveFailures = 0;
-      // state.fallenPins = fallenPins.length;
-      // return state;
+      previousState[player].score += fallenPins.length;
+      previousState[player].consecutiveFailures = 0;
+      previousState.fallenPins = fallenPins.length;
+      return previousState;
 
       // FIXME: unpure reducer: nested state mutated => player listener won't see the action
       // FIXME: !! BobListener listens modifications on Bob's substate
-      // const nextState = { ...state, fallenPins: fallenPins.length };
+      // const nextState = { ...previousState, fallenPins: fallenPins.length };
       // nextState[player].consecutiveFailures = 0;
       // nextState[player].score += fallenPins.length;
       // return nextState;
@@ -165,7 +165,7 @@ const crowd = () => {
       const fallenPinsOnLastThrow = nextState.fallenPins;
       if (fallenPinsOnLastThrow) {
         console.log('Spectateurs: 👏👏👏👏\n');
-      } else {
+      } else if (fallenPinsOnLastThrow === 0) {
         console.log('Spectateurs: 😞\n');
       }
     } else {
