@@ -423,7 +423,7 @@ state = {
     },
     {
       id : "post2",
-      author : 'user2',
+      authorID : 'user2',
       body : "......",
       commentsID : ["comment3", "comment4", "comment5"],
     }
