@@ -98,7 +98,7 @@ function rootReducer(previousState = {}, action) {
 
       // else, several pins fell
 
-      // TODO: toggle this block and the next one to make reducer unpure
+      // FIXME: toggle this block and the next one to make reducer unpure
       const nextPlayerState = {
         ...previousPlayerState,
         score: previousPlayerState.score + fallenPins.length,
