@@ -111,10 +111,8 @@ Note: action = Objet { joueur, quilles tombées }
 ~~~
 ### reducer
 ![throw](resources/gears.png)<!-- .element: class="slide-icon" -->
-fonction pure
-```
-reducer: (previousScore, action) => nextScore
-```
+![action](resources/referee.png) <!-- .element class="no-border-image" -->
+
 
 ~~~
 ### listeners
@@ -334,8 +332,7 @@ Note: le but n'est pas de dire que que redux est mieux ou moins bien que telle o
 ## Bonnes pratiques
 
 ~~~
-##### le _store_ qui murmurait
-##### à l'oreille des _listeners_
+##### Pourquoi l'immutabilité ?
 📄 <!-- .element: class="slide-icon" -->
 
 - listeners notifiés à chaque action dispatchée
@@ -643,9 +640,15 @@ Note: Débat non tranché
 ```javascript
 (dispatch, getState) => {}
 ```
-- accès au state <!-- .element: class="fragment" -->
-- multiples dispatch possibles <!-- .element: class="fragment" -->
-- appels asynchrones possibles (Promise.then(dispatch).catch(dispatch)) <!-- .element: class="fragment" -->
+- accès au state avant / après dispatch
+- multiples dispatch
+- appels asynchrones
+```javascript
+Promise.then(
+    dispatch(successAction),
+    dispatch(failureAction)
+)
+```
 
 
 ~~~
@@ -677,12 +680,12 @@ function fetchArticles() {
     dispatch(startFetchingArticles());
 
     fetchData()
-      .then(data => {
-        dispatch(fetchArticlesSuccess(data));
-      })
-      .catch(err => {
-        dispatch(fetchArticlesError(err.message));
-      });
+      .then(
+        // success
+        data => dispatch(fetchArticlesSuccess(data)),
+        // failure
+        () => dispatch(fetchArticlesError(err.message))
+    });
   }
 }
 ```
