@@ -3,7 +3,6 @@
 ___
 Jean Martineau-Figuette <!-- .element class="align-right" -->
 
-22 mai 2018 <!-- .element class="align-right" -->
 Note:
 couper le téléphone
 
@@ -355,7 +354,7 @@ Note:
 ### structuration du _state_
 📄 <!-- .element: class="slide-icon" -->
 
-normaliser les données
+~~états imbriqués~~
 ```javascript
 // NOT NORMALIZED
 state = {
@@ -402,6 +401,11 @@ state = {
   ]
 };
 ```
+👎 complexité + duplication + rafraichissements intempestifs
+
+Note:
+DEMO: node src/nested-state-problem.js
+
 
 ~~~
 ### structuration du _state_
@@ -459,11 +463,7 @@ state = {
   ],
 };
 ```
-Considérez le state comme une base de données <!-- .element class="fragment" -->
-
-Note:
-- états imbriqués créent de la complexité
-- problèmes de performance
+_state_  comme une base de données
 
 ~~~
 ### structuration du _state_ (II)
@@ -548,7 +548,7 @@ function getCountriesByPopulationDesc(state) {
 
 Note:
 - Selector = GETTER vs Reducer crée nouveau state
-- selectors PARTOUT où accès au state. Ex: pour renommer _countries_ par _mostPopulatedCountries_
+- selectors PARTOUT où accès au state. Pour renommer, pour normaliser une partie imbriquée
 - la façon de structurer le state devient un détail d'implémentation.
 
 ~~~
@@ -563,13 +563,18 @@ Note:
 import { createSelector } from 'reselect';
 
 const getCountries = state => state.countries;
+const getSortingOrder = state => state.sortingOrder;
 
 // donnée dérivée du state => reselect
 const getCountriesByPopulationDesc = createSelector(
-  getCountries,
-  countries => Object.values(countries).sort(
-    (a, b) => b.population - a.population
-  );
+  [getCountries, getSortingOrder],
+  (countries, sortingOrder) => {
+    const result = Object.values(countries).sort(
+      (a, b) => b.population - a.population
+    );
+    return sortingOrder === 'DESC'
+      ? result
+      : result.reverse();
 }
 ```
 <!-- .element class="fragment" -->
@@ -644,7 +649,7 @@ Note: Débat non tranché
 - multiples dispatch
 - appels asynchrones
 ```javascript
-Promise.then(
+anyPromise.then(
     dispatch(successAction),
     dispatch(failureAction)
 )
