@@ -1,11 +1,18 @@
 import { createStore } from 'redux';
 import deepFreeze from 'deep-freeze';
 
-import reducer, { getFallenPins, getPlayerState, initGame, throwPin } from './molkky';
+import reducer, { getFallenPins, getPlayerState, initGame, throwPin } from '../components/Molkky';
 
 describe('mölkky duck', () => {
+
   test('should create a new game, removing old players', () => {
-    const store = createStore(reducer, { Niobe: { name: 'Niobe', score: 14, consecutiveFailures: 1 }});
+    const store = createStore(reducer, {
+      Niobe: {
+        name: 'Niobe',
+        score: 14,
+        consecutiveFailures: 1
+      }
+    });
     const previousState = deepFreeze(store.getState());
     expect(getPlayerState(previousState, 'Niobe').score).toEqual(14);
 

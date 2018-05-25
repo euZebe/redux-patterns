@@ -1,5 +1,5 @@
 import { createStore } from 'redux';
-import reducer, { getFallenPins, getPlayerState, initGame, throwPin } from './molkky';
+import reducer, { getFallenPins, getPlayerState, initGame, throwPin } from './components/Molkky';
 
 // init store
 const store = createStore(reducer);

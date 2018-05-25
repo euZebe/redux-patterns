@@ -7,7 +7,7 @@
  * @param players: string[]
  * @returns {{ type: string, players: string[] }}
  */
-export function initGame(players) {
+export function initGame(players=['Alice', 'Bob']) {
   console.log('=> jeu initialisé');
   return {
     type: 'INIT_SCORES_SHEET',
@@ -62,7 +62,7 @@ export default function reducer(previousState = {}, action) {
           consecutiveFailures: 0,
         };
         return aggregator;
-      }, {});
+      }, { players: action.players });
 
     case 'THROW':
       const { player, fallenPins } = action;
@@ -130,3 +130,5 @@ export default function reducer(previousState = {}, action) {
 export const getPlayerState = (state, playerName) => state[playerName];
 
 export const getFallenPins = state => state.fallenPins;
+
+export const getPlayers = state => state.players || [];
