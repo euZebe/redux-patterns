@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import Button from '@material-ui/core/Button';
+import { Button } from '@material-ui/core';
 import PreparedPins from './PreparedPins';
 import ScoreContainer from './ScoreContainer';
 
@@ -41,14 +41,14 @@ export default class Molkky extends PureComponent {
   }
 
   render() {
-    const { previousFallenPins, playersScores } = this.props;
+    const { playersScores } = this.props;
     return (
       <Container>
         <Button size="small" variant="raised" onClick={this.initGame}>init game</Button>
 
-        <PreparedPins pins={Object.values(this.state)} toggle={this.toggle} />
+        <PreparedPins pins={Object.values(this.state)} toggle={this.toggle}/>
 
-        {playersScores.map(({name}) =>
+        {playersScores.map(({ name }) =>
           <Button
             key={name}
             size="small"

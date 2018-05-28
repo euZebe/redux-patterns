@@ -10,14 +10,19 @@ const Container = styled.span`
   justify-items: center;
 `;
 
+const CenteringSingleChild = styled.span`
+  display: flex;
+  justify-content: center;
+`;
+
 const PreparedPins = ({ pins, toggle }) => (
-  <span>
-  <Container>
-    {pins.map(p =>
-      <Pin key={p.value} value={p.value} isDown={p.isDown} toggle={toggle} />
-    )}
-  </Container>
-  </span>
+  <CenteringSingleChild>
+    <Container>
+      {pins.map(p =>
+        <Pin key={p.value} value={p.value} isDown={p.isDown} toggle={toggle} />
+      )}
+    </Container>
+  </CenteringSingleChild>
 );
 
 PreparedPins.propTypes = {};

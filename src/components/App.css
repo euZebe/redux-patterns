@@ -1,5 +1,9 @@
 .App {
   text-align: center;
+  display: grid;
+  grid-template-columns: 30vw 1fr;
 }
-.App> :first-child {
+
+.App::first-child {
+  display: flex;
 }
