@@ -4,8 +4,9 @@ import Button from '@material-ui/core/Button';
 const Pin = ({ value, isDown, toggle }) => (
   <Button
     variant='fab'
+    mini
     color={!isDown ? 'primary' : undefined}
-    onClick={toggle}
+    onClick={() => toggle(value)}
   >
     {value}
   </Button>

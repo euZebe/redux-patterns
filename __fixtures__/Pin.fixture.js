@@ -1,5 +1,7 @@
 import Pin from '../src/components/Pin';
 
+const toggle = value => alert(`pin ${value} toggled`);
+
 export default [
   {
     component: Pin,
@@ -7,7 +9,7 @@ export default [
     props: {
       value: 4,
       isOff: false,
-      toggle: () => alert('pin toggled')
+      toggle,
     }
   },
   {
@@ -16,7 +18,7 @@ export default [
     props: {
       value: 12,
       isOff: true,
-      toggle: () => alert('pin toggled')
+      toggle,
     }
   }
 ]

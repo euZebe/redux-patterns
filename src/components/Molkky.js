@@ -1,8 +1,16 @@
 import React, { PureComponent } from 'react';
-import Pin from './Pin';
+import styled from 'styled-components';
+import Button from '@material-ui/core/Button';
+import PreparedPins from './PreparedPins';
+import ScoreContainer from './ScoreContainer';
+
+const Container = styled.div`
+  display: inline-block;
+  margin: 1em;
+`;
 
 
-const initialState = [...Array(12)].reduce((agg, e, i) => {
+const initialPinsState = [...Array(12)].reduce((agg, e, i) => {
   agg[i + 1] = { value: i + 1, isDown: false };
   return agg;
 }, {});
@@ -13,40 +21,49 @@ export default class Molkky extends PureComponent {
 
   static defaultProps = {};
 
-  state = initialState;
+  state = initialPinsState;
 
-  toggle = value => () => {
+  toggle = (value) => {
     const toggledStatePin = { value, isDown: !this.state[value].isDown };
     this.setState({ [value]: toggledStatePin })
   };
 
   initGame = () => {
     this.props.initGame(['Alice', 'Bob']);
-    this.setState(initialState);
+    this.setState(initialPinsState);
   };
 
-  render() {
+  throwPin = (player) => {
+    const { throwPin } = this.props;
     const fallenPins = Object.values(this.state).filter(p => p.isDown).map(p => p.value);
-    const { throwPin, previousFallenPins, playersScores } = this.props;
+    throwPin(fallenPins, player);
+    this.setState(initialPinsState);
+  }
+
+  render() {
+    const { previousFallenPins, playersScores } = this.props;
     return (
-      <div>
-        <div>
-          {Object.values(this.state).map(p =>
-            <Pin key={p.value} value={p.value} isDown={p.isDown} toggle={this.toggle(p.value)} />
-          )}
-        </div>
-        <button onClick={this.initGame}>init game</button>
-        <button onClick={() => throwPin(fallenPins, 'Alice')}>Alice plays</button>
-        <button onClick={() => throwPin(fallenPins, 'Bob')}>Bob plays</button>
-        <p>{parseInt(previousFallenPins, 10) >= 0 ? `Last throw: ${previousFallenPins} pin(s) fell.` : '_'}</p>
+      <Container>
+        <Button size="small" variant="raised" onClick={this.initGame}>init game</Button>
+
+        <PreparedPins pins={Object.values(this.state)} toggle={this.toggle} />
+
+        {playersScores.map(({name}) =>
+          <Button
+            key={name}
+            size="small"
+            variant="raised"
+            onClick={() => this.throwPin(name)}
+          >
+            {name} plays</Button>
+        )}
+
+        <p>_</p>
 
         {playersScores.map(p => (
-          <span>
-            <h3>{p.name}</h3>
-            <p>Score: {p.score}, ratés consécutifs: {p.consecutiveFailures}</p>
-          </span>
+          <ScoreContainer key={p.name} {...p} />
         ))}
-      </div>
+      </Container>
     );
   }
 }
