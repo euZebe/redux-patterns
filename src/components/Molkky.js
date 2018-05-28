@@ -3,7 +3,7 @@ import Pin from './Pin';
 
 
 const initialState = [...Array(12)].reduce((agg, e, i) => {
-  agg[i + 1] = { value: i + 1, isOn: false };
+  agg[i + 1] = { value: i + 1, isDown: false };
   return agg;
 }, {});
 
@@ -16,29 +16,29 @@ export default class Molkky extends PureComponent {
   state = initialState;
 
   toggle = value => () => {
-    const toggledStatePin = { value, isOn: !this.state.isOn };
+    const toggledStatePin = { value, isDown: !this.state[value].isDown };
     this.setState({ [value]: toggledStatePin })
   };
 
   initGame = () => {
     this.props.initGame(['Alice', 'Bob']);
-    this.setState({ initialState });
+    this.setState(initialState);
   };
 
   render() {
-    console.log(JSON.stringify(this.state, null, '  '));
-    const { initGame, throwPin, fallenPins, playersScores } = this.props;
+    const fallenPins = Object.values(this.state).filter(p => p.isDown).map(p => p.value);
+    const { throwPin, previousFallenPins, playersScores } = this.props;
     return (
       <div>
         <div>
           {Object.values(this.state).map(p =>
-            <Pin key={p.value} value={p.value} isOn={p.isOn} toggle={this.toggle(p.value)} />
+            <Pin key={p.value} value={p.value} isDown={p.isDown} toggle={this.toggle(p.value)} />
           )}
         </div>
-        <button onClick={initGame}>init game</button>
-        <button onClick={() => throwPin([1, 4, 5, 9], 'Alice')}>Alice plays</button>
-        <button onClick={() => throwPin([], 'Bob')}>Bob plays</button>
-        <p>{parseInt(fallenPins, 10) >= 0 ? `Last throw: ${fallenPins} pin(s) fell.` : '_'}</p>
+        <button onClick={this.initGame}>init game</button>
+        <button onClick={() => throwPin(fallenPins, 'Alice')}>Alice plays</button>
+        <button onClick={() => throwPin(fallenPins, 'Bob')}>Bob plays</button>
+        <p>{parseInt(previousFallenPins, 10) >= 0 ? `Last throw: ${previousFallenPins} pin(s) fell.` : '_'}</p>
 
         {playersScores.map(p => (
           <span>

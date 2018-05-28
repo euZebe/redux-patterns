@@ -5,7 +5,7 @@ import { initGame, throwPin, getFallenPins, getPlayers, getPlayerState } from '.
 const mapStateToProps = (state => {
     const playersScores = getPlayers(state).map(player => getPlayerState(state, player));
     return {
-      fallenPins: getFallenPins(state),
+      previousFallenPins: getFallenPins(state),
       playersScores
     };
   }

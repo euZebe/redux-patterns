@@ -1,10 +1,10 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 
-const Pin = ({ value, isOn, toggle }) => (
+const Pin = ({ value, isDown, toggle }) => (
   <Button
     variant='fab'
-    color={isOn ? 'primary' : undefined}
+    color={!isDown ? 'primary' : undefined}
     onClick={toggle}
   >
     {value}

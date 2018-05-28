@@ -8,7 +8,7 @@
  * @returns {{ type: string, players: string[] }}
  */
 export function initGame(players=['Alice', 'Bob']) {
-  console.log('=> jeu initialisé');
+  console.log('=> jeu initialisé', JSON.stringify(players));
   return {
     type: 'INIT_SCORES_SHEET',
     players, // same as players: players
