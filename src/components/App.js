@@ -1,17 +1,11 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import DevTools from './DevTools';
 import Molkky from './MolkkyContainer';
 
 const Container = styled.div`
-  text-align: center;
-  display: grid;
-  grid-template-columns: 30vw 1fr;
-  
-  @media (max-width: 700px) {
-    grid-template-rows: 100vh 0;
-    grid-template-columns: 1fr;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 class App extends Component {
@@ -19,7 +13,6 @@ class App extends Component {
     return (
       <Container>
         <Molkky />
-        <DevTools />
       </Container>
     );
   }

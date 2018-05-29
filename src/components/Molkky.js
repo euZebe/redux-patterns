@@ -1,12 +1,23 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { Button } from '@material-ui/core';
+import { PlayArrow } from '@material-ui/icons';
 import PreparedPins from './PreparedPins';
 import ScoreContainer from './ScoreContainer';
 
 const Container = styled.div`
-  display: inline-block;
+  display: grid;
+  flex-direction: column;
   margin: 1em;
+  min-width: 30vw;
+  
+  @media (max-width: 700px) {
+    width: 95vw;
+  }
+`;
+
+const ButtonWithMargin = styled(Button)`
+  margin: 0.3rem !important;
 `;
 
 
@@ -49,13 +60,14 @@ export default class Molkky extends PureComponent {
         <PreparedPins pins={Object.values(this.state)} toggle={this.toggle}/>
 
         {playersScores.map(({ name }) =>
-          <Button
+          <ButtonWithMargin
             key={name}
             size="small"
             variant="raised"
             onClick={() => this.throwPin(name)}
           >
-            {name} plays</Button>
+            <PlayArrow/> {name}
+          </ButtonWithMargin>
         )}
 
         <p>_</p>
