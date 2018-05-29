@@ -1,7 +1,7 @@
 import { createStore } from 'redux';
 import deepFreeze from 'deep-freeze';
 
-import reducer, { getFallenPins, getPlayerState, initGame, throwPin } from '../components/Molkky';
+import reducer, { getFallenPins, getPlayerState, initGame, throwPin } from './molkky-duck';
 
 describe('mölkky duck', () => {
 
