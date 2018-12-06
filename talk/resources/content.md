@@ -3,9 +3,6 @@
 ___
 Jean Martineau-Figuette <!-- .element class="align-right" -->
 
-Note:
-couper le téléphone
-
 ~~~
 ## Programme
 📅 <!-- .element class="slide-icon" -->
@@ -37,7 +34,25 @@ Note:
 Note:
 1. L'état de l'application est défini par un seul objet, géré par un _store_ unique.
 2. PAS DE MUTATION
-
+~~~
+## Que signifie "reduce" ?
+```
+[1, 2, 3, 5, 8, 13].reduce((aggregator, truc) => {
+  return aggregator + truc;
+}, 6); // <= initial value
+```
+~~~
+## another example
+```
+[
+  {code: 'fr', popul: 66}, 
+  {code:'fin', popul: 5}, 
+  {code: 'can', popul: 36}
+].reduce((aggregator, country) => {
+  aggregator[country.code] = country.popul;
+  return aggregator;
+}, {});
+```
 ~~~
 ## fonction pure / impure
 ```javascript
